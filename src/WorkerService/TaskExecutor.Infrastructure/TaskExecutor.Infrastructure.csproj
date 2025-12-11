@@ -1,0 +1,25 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp.Scripting" Version="4.8.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore" Version="8.0.0" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="8.0.0" />
+    <PackageReference Include="RabbitMQ.Client" Version="6.8.1" />
+    <PackageReference Include="System.Text.Json" Version="10.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\TaskExecutor.Domain\TaskExecutor.Domain.csproj" />
+    <ProjectReference Include="..\TaskExecutor.Application\TaskExecutor.Application.csproj" />
+    <ProjectReference Include="..\..\TaskService\TaskManagement.Domain\TaskManagement.Domain.csproj" />
+    <ProjectReference Include="..\..\TaskService\TaskManagement.Infrastructure\TaskManagement.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>
+
