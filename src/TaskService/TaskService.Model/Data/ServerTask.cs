@@ -1,4 +1,4 @@
-using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
+using TaskStatus = TaskService.Client.Tasks.TaskStatus;
 
 namespace TaskService.Model.Data;
 

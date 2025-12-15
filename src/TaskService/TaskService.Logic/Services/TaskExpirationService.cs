@@ -3,7 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using TaskService.Model.Data;
-using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
+using TaskStatus = TaskService.Client.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services;
 

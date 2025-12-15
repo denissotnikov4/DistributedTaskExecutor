@@ -1,4 +1,4 @@
-namespace TaskService.Client.Models.Tasks;
+namespace TaskService.Client.Tasks;
 
 public enum TaskStatus
 {

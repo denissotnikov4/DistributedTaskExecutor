@@ -1,5 +1,5 @@
 using AutoMapper;
-using TaskService.Client.Models.Tasks;
+using TaskService.Client.Tasks;
 using TaskService.Model.Data;
 
 namespace TaskService.Logic.Mappings;

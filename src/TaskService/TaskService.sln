@@ -6,7 +6,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Api", "TaskServ
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Clients", "Clients", "{67CA649C-BB6F-4AE1-B64E-C4DEA6108778}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Client.Models", "TaskService.Client.Models\TaskService.Client.Models.csproj", "{DFF77F96-98A7-4D80-8A24-6DEE78E43FCA}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Client", "TaskService.Client\TaskService.Client.csproj", "{DFF77F96-98A7-4D80-8A24-6DEE78E43FCA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Logic", "TaskService.Logic\TaskService.Logic.csproj", "{EA82529A-ED29-4116-8D1C-BCC25DCAE44F}"
 EndProject

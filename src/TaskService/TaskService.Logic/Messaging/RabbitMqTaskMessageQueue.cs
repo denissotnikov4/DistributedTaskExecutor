@@ -2,7 +2,7 @@ using System.Text;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
-using TaskService.Client.Models.Tasks;
+using TaskService.Client.Tasks;
 
 namespace TaskService.Logic.Messaging;
 

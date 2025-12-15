@@ -1,9 +1,9 @@
 using AutoMapper;
-using TaskService.Client.Models.Requests;
+using TaskService.Client.Requests;
 using TaskService.Logic.Messaging;
 using TaskService.Model.Data;
 using TaskService.Model.Repositories;
-using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
+using TaskStatus = TaskService.Client.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services;
 
