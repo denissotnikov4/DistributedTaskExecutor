@@ -28,10 +28,7 @@ jobs:
         run: dotnet build ./src/TaskService/TaskService.Client/TaskService.Client.csproj --configuration Release --no-restore
 
       - name: Pack
-        run: dotnet pack ./src/TaskService/TaskService.Client/TaskService.Client.csproj \
-          --configuration Release \
-          --no-build \
-          -p:PackageVersion=${{ github.event.inputs.version }} -o out
+        run: dotnet pack ./src/TaskService/TaskService.Client/TaskService.Client.csproj --configuration Release --no-build -p:PackageVersion=${{ github.event.inputs.version }} -o out
 
       - name: Push
         run: dotnet nuget push "out/*.nupkg" \
