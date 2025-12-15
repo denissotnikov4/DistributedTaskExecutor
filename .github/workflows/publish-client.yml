@@ -22,10 +22,10 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore ./src/TaskService/TaskService.Client.csproj
+        run: dotnet restore ./src/TaskService/TaskService.Client/TaskService.Client.csproj
 
       - name: Build
-        run: dotnet build ./src/TaskService/TaskService.Client.csproj --configuration Release --no-restore
+        run: dotnet build ./src/TaskService/TaskService.Client/TaskService.Client.csproj --configuration Release --no-restore
 
       - name: Pack
         run: dotnet pack --configuration Release --no-build \
