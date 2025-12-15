@@ -22,14 +22,16 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore
+        run: dotnet restore ./src/TaskService/TaskService.Client.csproj
 
       - name: Build
-        run: dotnet build --configuration Release --no-build \
+        run: dotnet build ./src/TaskService/TaskService.Client.csproj --configuration Release --no-restore
+
+      - name: Pack
+        run: dotnet pack --configuration Release --no-build \
           -p:PackageVersion=${{ github.event.inputs.version }} -o out
 
-      - name: Publish
+      - name: Push
         run: dotnet nuget push "out/*.nupkg" \
           --api-key ${{ secrets.NUGET_API_KEY }} \
           --source https://api.nuget.org/v3/index.json
-      
