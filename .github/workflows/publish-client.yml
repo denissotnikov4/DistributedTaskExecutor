@@ -1,4 +1,4 @@
-name: Publish Nuget
+name: Publish Client (NuGet)
 
 on:
   workflow_dispatch:
@@ -31,6 +31,4 @@ jobs:
         run: dotnet pack ./src/TaskService/TaskService.Client/TaskService.Client.csproj --configuration Release --no-build -p:PackageVersion=${{ github.event.inputs.version }} -o out
 
       - name: Push
-        run: dotnet nuget push "out/*.nupkg" \
-          --api-key ${{ secrets.NUGET_API_KEY }} \
-          --source https://api.nuget.org/v3/index.json
+        run: dotnet nuget push "out/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
