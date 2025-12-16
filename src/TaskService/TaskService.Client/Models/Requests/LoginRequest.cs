@@ -1,4 +1,4 @@
-namespace TaskService.Client.Requests;
+namespace TaskService.Client.Models.Requests;
 
 public class LoginRequest
 {

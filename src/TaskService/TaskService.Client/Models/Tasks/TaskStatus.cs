@@ -1,4 +1,4 @@
-namespace TaskService.Client.Tasks;
+namespace TaskService.Client.Models.Tasks;
 
 public enum TaskStatus
 {
@@ -20,10 +20,10 @@ public enum TaskStatus
     /// <summary>
     /// Завершилась с ошибкой.
     /// </summary>
-    Failed = 4,
+    Failed = 3,
 
     /// <summary>
     /// Истекла.
     /// </summary>
-    Expired = 3
+    Expired = 4
 }

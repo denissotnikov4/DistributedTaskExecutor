@@ -1,4 +1,4 @@
-using TaskService.Client.Tasks;
+using TaskService.Client.Models.Tasks;
 
 namespace TaskService.Logic.Messaging;
 

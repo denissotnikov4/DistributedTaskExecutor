@@ -1,4 +1,4 @@
-using TaskService.Client.Requests;
+using TaskService.Client.Models.Requests;
 using TaskService.Model.Data;
 
 namespace TaskService.Logic.Services;

@@ -1,4 +1,4 @@
-namespace TaskService.Client.Tasks;
+namespace TaskService.Client.Models.Tasks;
 
 public class ClientTask
 {
