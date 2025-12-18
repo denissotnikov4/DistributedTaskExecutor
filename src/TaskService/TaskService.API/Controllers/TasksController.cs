@@ -1,23 +1,19 @@
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TaskService.Client.Models.Requests;
 using TaskService.Client.Models.Tasks;
-using TaskService.Logic.Services;
+using TaskService.Logic.Services.Tasks;
 
 namespace TaskService.Api.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-[Authorize]
 public class TasksController : ControllerBase
 {
     private readonly ITaskService taskService;
-    private readonly ILogger<TasksController> logger;
 
-    public TasksController(ITaskService taskService, ILogger<TasksController> logger)
+    public TasksController(ITaskService taskService)
     {
         this.taskService = taskService ?? throw new ArgumentNullException(nameof(taskService));
-        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     /// <summary>
@@ -26,13 +22,9 @@ public class TasksController : ControllerBase
     [HttpPost]
     [ProducesResponseType(typeof(ClientTask), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<ActionResult<ClientTask>> CreateTask([FromBody] CreateTaskRequest request)
+    public async Task<ActionResult> CreateTaskAsync([FromBody] TaskCreateRequest request)
     {
-        this.logger.LogInformation("Creating new task: {Description}", request.Description);
-
-        var createdId = await this.taskService.CreateTaskAsync(request);
-
-        return this.CreatedAtAction(nameof(this.GetTask), new { id = createdId });
+        return this.CreatedAtAction("GetTaskById", new { id = Guid.NewGuid() });
     }
 
     /// <summary>
@@ -41,16 +33,11 @@ public class TasksController : ControllerBase
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ClientTask), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ClientTask>> GetTask(Guid id)
+    public async Task<ActionResult> GetTaskByIdAsync(Guid id)
     {
-        var result = await this.taskService.GetTaskByIdAsync(id);
+        var foundTask = await this.taskService.GetTaskByIdAsync(id);
 
-        if (result == null)
-        {
-            return this.NotFound();
-        }
-
-        return this.Ok(result);
+        return foundTask == null ? this.NotFound() : this.Ok(foundTask);
     }
 
     /// <summary>
@@ -58,10 +45,9 @@ public class TasksController : ControllerBase
     /// </summary>
     [HttpGet]
     [ProducesResponseType(typeof(IEnumerable<ClientTask>), StatusCodes.Status200OK)]
-    public async Task<ActionResult<IEnumerable<ClientTask>>> GetAllTasks()
+    public async Task<ActionResult> GetAllTasksAsync()
     {
-        var result = await this.taskService.GetAllTasksAsync();
-        return this.Ok(result);
+        return this.Ok(await this.taskService.GetAllTasksAsync());
     }
 
     /// <summary>
@@ -71,17 +57,10 @@ public class TasksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<ActionResult<ClientTask>> RetryTask(Guid id)
+    public async Task<ActionResult> RetryTaskAsync(Guid id)
     {
-        try
-        {
-            await this.taskService.RetryTaskAsync(id);
+        await this.taskService.RetryTaskAsync(id);
 
-            return this.Ok();
-        }
-        catch (InvalidOperationException ex)
-        {
-            return this.BadRequest(new { error = ex.Message });
-        }
+        return this.NoContent();
     }
 }

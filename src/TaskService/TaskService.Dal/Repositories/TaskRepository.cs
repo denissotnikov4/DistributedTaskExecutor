@@ -1,7 +1,8 @@
 using Microsoft.EntityFrameworkCore;
-using TaskService.Model.Data;
+using TaskService.Dal.Data;
+using TaskService.Dal.Models;
 
-namespace TaskService.Model.Repositories;
+namespace TaskService.Dal.Repositories;
 
 public class TaskRepository : ITaskRepository
 {
@@ -48,10 +49,5 @@ public class TaskRepository : ITaskRepository
 
             await this.context.SaveChangesAsync(cancellationToken);
         }
-    }
-
-    public async Task<bool> ExistsAsync(Guid id, CancellationToken cancellationToken = default)
-    {
-        return await this.context.Tasks.AnyAsync(t => t.Id == id, cancellationToken);
     }
 }

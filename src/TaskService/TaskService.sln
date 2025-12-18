@@ -10,7 +10,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Client", "TaskS
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Logic", "TaskService.Logic\TaskService.Logic.csproj", "{EA82529A-ED29-4116-8D1C-BCC25DCAE44F}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Model", "TaskService.Model\TaskService.Model.csproj", "{90E91B37-459F-4306-9C0E-31790E9CEA10}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Dal", "TaskService.Dal\TaskService.Dal.csproj", "{90E91B37-459F-4306-9C0E-31790E9CEA10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

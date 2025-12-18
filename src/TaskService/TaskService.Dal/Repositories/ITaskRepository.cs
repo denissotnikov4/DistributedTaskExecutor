@@ -1,6 +1,6 @@
-using TaskService.Model.Data;
+using TaskService.Dal.Models;
 
-namespace TaskService.Model.Repositories;
+namespace TaskService.Dal.Repositories;
 
 public interface ITaskRepository
 {
@@ -12,5 +12,6 @@ public interface ITaskRepository
 
     Task UpdateAsync(ServerTask serverTask, CancellationToken cancellationToken = default);
 
+    // В контроллере должен быть соответствующий метод с валидацией возможности удаления.
     Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
 }

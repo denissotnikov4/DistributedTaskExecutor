@@ -4,13 +4,13 @@ public class ClientTask
 {
     public Guid Id { get; set; }
 
-    public string? Name { get; set; }
+    public string Name { get; set; }
 
-    public string Code { get; set; } = null!;
+    public string Code { get; set; }
 
-    public string? Input { get; set; }
+    public string? Data { get; set; }
 
-    public string? Output { get; set; }
+    public string? Result { get; set; }
 
     public TaskStatus Status { get; set; }
 

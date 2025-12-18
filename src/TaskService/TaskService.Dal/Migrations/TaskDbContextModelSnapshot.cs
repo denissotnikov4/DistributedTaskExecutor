@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using TaskService.Model.Data;
+using TaskService.Dal.Data;
+using TaskService.Dal.Models;
 
-namespace TaskService.Model.Migrations;
+namespace TaskService.Dal.Migrations;
 
 [DbContext(typeof(TaskDbContext))]
 internal class TaskDbContextModelSnapshot : ModelSnapshot

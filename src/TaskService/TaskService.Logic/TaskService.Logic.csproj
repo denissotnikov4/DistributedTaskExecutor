@@ -14,7 +14,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TaskService.Client\TaskService.Client.csproj" />
-      <ProjectReference Include="..\TaskService.Model\TaskService.Model.csproj" />
+      <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
     </ItemGroup>
 
 </Project>

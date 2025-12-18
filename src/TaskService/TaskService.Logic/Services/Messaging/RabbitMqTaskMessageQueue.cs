@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using TaskService.Client.Models.Tasks;
 
-namespace TaskService.Logic.Messaging;
+namespace TaskService.Logic.Services.Messaging;
 
 public class RabbitMqTaskMessageQueue : ITaskMessageQueue, IDisposable
 {
@@ -12,8 +12,10 @@ public class RabbitMqTaskMessageQueue : ITaskMessageQueue, IDisposable
     private readonly IModel channel;
     private readonly ILogger<RabbitMqTaskMessageQueue> logger;
 
+    // Может стоит вынести в настройки?
     private const string TaskQueueName = "task_queue";
-    private const string ResultQueueName = "task_result_queue";
+    
+    // Зачем нужна эта очередь?
     private const string ExchangeName = "task_exchange";
 
     public RabbitMqTaskMessageQueue(
@@ -29,19 +31,17 @@ public class RabbitMqTaskMessageQueue : ITaskMessageQueue, IDisposable
             HostName = hostName,
             UserName = userName,
             Password = password,
+            
+            // Может стоит вынести в настройки?
             Port = 5672
         };
 
         this.connection = factory.CreateConnection();
         this.channel = this.connection.CreateModel();
 
-        // Объявляем exchange и очереди
         this.channel.ExchangeDeclare(ExchangeName, ExchangeType.Direct, true);
         this.channel.QueueDeclare(TaskQueueName, true, false, false);
-        this.channel.QueueDeclare(ResultQueueName, true, false, false);
-
         this.channel.QueueBind(TaskQueueName, ExchangeName, "task");
-        this.channel.QueueBind(ResultQueueName, ExchangeName, "result");
     }
 
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -68,46 +68,19 @@ public class RabbitMqTaskMessageQueue : ITaskMessageQueue, IDisposable
                 properties,
                 body);
 
-            this.logger.LogInformation("Task {TaskId} published to queue", task.Id);
+            this.logger.LogInformation("Task {TaskId} published to queue.", task.Id);
             return Task.CompletedTask;
         }
         catch (Exception ex)
         {
-            this.logger.LogError(ex, "Error publishing task {TaskId} to queue", task.Id);
+            this.logger.LogError(ex, "Error publishing task {TaskId} to queue.", task.Id);
             throw;
         }
     }
 
     public Task<ClientTask?> ConsumeTaskAsync(CancellationToken cancellationToken = default)
     {
-        throw new NotSupportedException("Use Worker service for consuming tasks from queue");
-    }
-
-    public Task PublishTaskResultAsync(ClientTask task, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            var message = JsonSerializer.Serialize(task, JsonOptions);
-            var body = Encoding.UTF8.GetBytes(message);
-
-            var properties = this.channel.CreateBasicProperties();
-            properties.Persistent = true;
-            properties.MessageId = task.Id.ToString();
-
-            this.channel.BasicPublish(
-                ExchangeName,
-                "result",
-                properties,
-                body);
-
-            this.logger.LogInformation("Task result {TaskId} published to result queue", task.Id);
-            return Task.CompletedTask;
-        }
-        catch (Exception ex)
-        {
-            this.logger.LogError(ex, "Error publishing task result {TaskId} to queue", task.Id);
-            throw;
-        }
+        throw new NotSupportedException("Use Worker service for consuming tasks from queue.");
     }
 
     public void Dispose()
