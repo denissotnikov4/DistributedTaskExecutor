@@ -8,7 +8,11 @@ public class ClientTask
 
     public string Code { get; set; }
 
-    public string? Data { get; set; }
+    public ProgrammingLanguage Language { get; set; }
+
+    public string? InputData { get; set; }
+
+    public Guid UserId { get; set; }
 
     public string? Result { get; set; }
 
@@ -24,5 +28,5 @@ public class ClientTask
 
     public string? ErrorMessage { get; set; }
 
-    public string? WorkerId { get; set; }
+    public int RetryCount { get; set; }
 }

@@ -27,7 +27,6 @@ public static class LogicMapper
                 .ForMember(dest => dest.CreatedAt, opt => opt.Ignore())
                 .ForMember(dest => dest.Ttl, opt => opt.Ignore())
                 .ForMember(dest => dest.ErrorMessage, opt => opt.Ignore())
-                .ForMember(dest => dest.WorkerId, opt => opt.Ignore())
                 .ForMember(dest => dest.RetryCount, opt => opt.Ignore());
         });
 

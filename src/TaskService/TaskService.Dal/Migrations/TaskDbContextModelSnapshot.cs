@@ -68,9 +68,6 @@ internal class TaskDbContextModelSnapshot : ModelSnapshot
             b.Property<TimeSpan>("Ttl")
                 .HasColumnType("interval");
 
-            b.Property<string>("WorkerId")
-                .HasColumnType("text");
-
             b.HasKey("Id");
 
             b.HasIndex("ExpiresAt");

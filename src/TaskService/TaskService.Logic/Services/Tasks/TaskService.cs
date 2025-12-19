@@ -60,7 +60,6 @@ public class TaskService : ITaskService
         serverTask.StartedAt = null;
         serverTask.CompletedAt = null;
         serverTask.ErrorMessage = null;
-        serverTask.WorkerId = null;
         serverTask.RetryCount++;
 
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);

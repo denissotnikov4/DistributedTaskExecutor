@@ -26,7 +26,6 @@ namespace TaskService.Dal.Migrations
                     Ttl = table.Column<TimeSpan>(type: "interval", nullable: false),
                     Result = table.Column<string>(type: "text", nullable: true),
                     ErrorMessage = table.Column<string>(type: "text", nullable: true),
-                    WorkerId = table.Column<string>(type: "text", nullable: true),
                     RetryCount = table.Column<int>(type: "integer", nullable: false, defaultValue: 0),
                     MaxRetries = table.Column<int>(type: "integer", nullable: false, defaultValue: 3),
                     Code = table.Column<string>(type: "text", nullable: true)
