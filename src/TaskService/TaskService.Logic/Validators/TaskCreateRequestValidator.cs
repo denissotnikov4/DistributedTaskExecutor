@@ -13,7 +13,7 @@ public class TaskCreateRequestValidator : AbstractValidator<TaskCreateRequest>
             .MaximumLength(500)
             .WithMessage("Description must not exceed 500 characters.");
 
-        this.RuleFor(x => x.Data)
+        this.RuleFor(x => x.InputData)
             .NotEmpty()
             .WithMessage("Payload is required.");
 

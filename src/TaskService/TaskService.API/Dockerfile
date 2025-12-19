@@ -1,15 +1,15 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
 
-COPY Api/Api.csproj Api/
-COPY Logic/Logic.csproj Logic/
-COPY Dal/Dal.csproj Dal/
+COPY TaskService.Api/TaskService.API.csproj TaskService.Api/
+COPY TaskService.Logic/TaskService.Logic.csproj TaskService.Logic/
+COPY TaskService.Dal/TaskService.Dal.csproj TaskService.Dal/
 
-RUN dotnet restore Api/Api.csproj
+RUN dotnet restore TaskService.Api/TaskService.API.csproj
 
 COPY . .
 
-RUN dotnet publish Api/Api.csproj -c Release -o /app/publish
+RUN dotnet publish TaskService.Api/TaskService.API.csproj -c Release -o /app/publish
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS runtime
 WORKDIR /app

@@ -1,3 +1,4 @@
+using TaskService.Client.Models.Tasks;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Dal.Models;
@@ -10,7 +11,9 @@ public class ServerTask
 
     public string Code { get; set; }
 
-    public string? Data { get; set; }
+    public ProgrammingLanguage Language { get; set; }
+
+    public string? InputData { get; set; }
 
     public Guid UserId { get; set; }
 
@@ -27,8 +30,6 @@ public class ServerTask
     public TimeSpan Ttl { get; set; }
 
     public string? ErrorMessage { get; set; }
-
-    public string? WorkerId { get; set; }
 
     public int RetryCount { get; set; }
 }

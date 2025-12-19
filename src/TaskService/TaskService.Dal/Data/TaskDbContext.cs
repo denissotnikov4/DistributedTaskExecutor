@@ -21,7 +21,7 @@ public class TaskDbContext : DbContext
             entity.HasKey(e => e.Id);
             entity.Property(e => e.Name).IsRequired().HasMaxLength(250);
             entity.Property(e => e.Code).IsRequired();
-            entity.Property(e => e.Data).IsRequired(false);
+            entity.Property(e => e.InputData).IsRequired(false);
             entity.Property(e => e.UserId).IsRequired();
             entity.Property(e => e.Result).IsRequired(false);
             entity.Property(e => e.Status).IsRequired();
@@ -30,7 +30,6 @@ public class TaskDbContext : DbContext
             entity.Property(e => e.CompletedAt).IsRequired(false);
             entity.Property(e => e.Ttl).IsRequired();
             entity.Property(e => e.ErrorMessage).IsRequired(false);
-            entity.Property(e => e.WorkerId).IsRequired(false);
             entity.Property(e => e.RetryCount).HasDefaultValue(0);
         });
     }
