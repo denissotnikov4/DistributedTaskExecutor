@@ -1,5 +1,3 @@
-using System.Security.Cryptography;
-using System.Text;
 using ApiKeysService.Client.Models;
 using ApiKeysService.Dal.Models;
 using ApiKeysService.Dal.Repositories;
@@ -20,54 +18,38 @@ public interface IApiKeysService
 
 public class ApiKeysService(
     IApiKeysUnitOfWork unitOfWork,
+    IApiKeyGenerator apiKeyGenerator,
     ILogger<ApiKeysService> logger
-)
-    : IApiKeysService
+) : IApiKeysService
 {
-    private const int KeyLengthInBytes = 32;
-
     public async Task<Result<ApiKeyCreateResponse>> CreateApiKeyAsync(ApiKeyCreateRequest request)
     {
-        var apiKeyBytes = new byte[KeyLengthInBytes];
-        using (var rng = RandomNumberGenerator.Create())
-        {
-            rng.GetBytes(apiKeyBytes);
-        }
-
-        var apiKey = Convert.ToBase64String(apiKeyBytes);
-
-        var keyPrefix = $"ak_{Guid.NewGuid():N}";
-        var fullApiKey = $"{keyPrefix}_{apiKey}";
-
-        var keyHash = ComputeHash(fullApiKey);
+        var apiKey = apiKeyGenerator.GenerateApiKey();
 
         var apiKeyEntity = new ApiKey
         {
             Id = Guid.NewGuid(),
-            KeyHash = keyHash,
+            KeyHash = ApiKeysHasher.ComputeHash(apiKey),
             Name = request.Name,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = request.ExpiresAt,
             IsActive = true
         };
 
-        if (request.Claims != null && request.Claims.Count > 0)
+        if (request.Claims is { Count: > 0 })
         {
             apiKeyEntity.Claims = request.Claims;
         }
 
         unitOfWork.ApiKeys.Create(apiKeyEntity);
         await unitOfWork.SaveChangesAsync();
-
-        var info = apiKeyEntity.MapToInfo();
-
         logger.LogInformation("Api-Key created with id: {ApiKeyId}", apiKeyEntity.Id);
 
         return new ApiKeyCreateResponse
         {
             Id = apiKeyEntity.Id,
-            ApiKey = fullApiKey, // Возвращаем только при создании
-            Info = info
+            ApiKey = apiKey,
+            Info = apiKeyEntity.MapToInfo()
         };
     }
 
@@ -75,7 +57,7 @@ public class ApiKeysService(
     {
         var apiKey = await unitOfWork.ApiKeys.GetByIdAsync(id);
 
-        if (apiKey == null)
+        if (apiKey is null)
         {
             return ServiceError.NotFound($"Api-Key with id {id} not found");
         }
@@ -92,12 +74,59 @@ public class ApiKeysService(
     public async Task<Result> UpdateApiKeyAsync(Guid id, ApiKeyUpdateRequest request)
     {
         var apiKey = await unitOfWork.ApiKeys.GetByIdAsync(id);
-        if (apiKey == null)
+        if (apiKey is null)
         {
             return ServiceError.NotFound($"Api-Key with id {id} not found");
         }
 
-        if (request.Name != null)
+        UpdateApiKeyProperties(apiKey, request);
+
+        unitOfWork.ApiKeys.Update(apiKey);
+        await unitOfWork.SaveChangesAsync();
+        
+        logger.LogInformation("Api-Key updated with id: {ApiKeyId}", id);
+        
+        return Result.Success;
+    }
+
+    public async Task<Result> DeleteApiKeyAsync(Guid id)
+    {
+        await unitOfWork.ApiKeys.DeleteAsync(id);
+        await unitOfWork.SaveChangesAsync();
+        
+        logger.LogInformation("Api-Key deleted with id: {ApiKeyId}", id);
+        
+        return Result.Success;
+    }
+
+    public async Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(string apiKey)
+    {
+        var apiKeyEntity = await unitOfWork.ApiKeys.GetByKeyHashAsync(ApiKeysHasher.ComputeHash(apiKey));
+
+        if (apiKeyEntity is null)
+        {
+            return ServiceError.Conflict("Api-Key not valid");
+        }
+
+        var validationResult = ValidateApiKeyStatus(apiKeyEntity);
+        if (!validationResult.IsSuccess)
+        {
+            return validationResult.Error;
+        }
+
+        await unitOfWork.ApiKeys.UpdateLastUsedAsync(apiKeyEntity.Id, DateTime.UtcNow);
+        await unitOfWork.SaveChangesAsync();
+
+        return new ApiKeyValidationResult
+        {
+            ApiKeyId = apiKeyEntity.Id,
+            Claims = apiKeyEntity.Claims
+        };
+    }
+
+    private static void UpdateApiKeyProperties(ApiKey apiKey, ApiKeyUpdateRequest request)
+    {
+        if (request.Name is not null)
         {
             apiKey.Name = request.Name;
         }
@@ -112,80 +141,24 @@ public class ApiKeysService(
             apiKey.IsActive = request.IsActive.Value;
         }
 
-        if (request.Claims != null)
+        if (request.Claims is not null)
         {
             apiKey.Claims = request.Claims;
         }
-
-        unitOfWork.ApiKeys.Update(apiKey);
-        await unitOfWork.SaveChangesAsync();
-        logger.LogInformation("Api-Key updated with id: {ApiKeyId}", id);
-        
-        return Result.Success;
     }
 
-    public async Task<Result> DeleteApiKeyAsync(Guid id)
+    private static Result ValidateApiKeyStatus(ApiKey apiKey)
     {
-        await unitOfWork.ApiKeys.DeleteAsync(id);
-        await unitOfWork.SaveChangesAsync();
-        logger.LogInformation("Api-Key deleted with id: {ApiKeyId}", id);
-        
-        return Result.Success;
-    }
-
-    public async Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(string apiKey)
-    {
-        var keyHash = ComputeHash(apiKey);
-
-        var apiKeyEntity = await unitOfWork.ApiKeys.GetByKeyHashAsync(keyHash);
-
-        if (apiKeyEntity == null)
-        {
-            return ServiceError.Conflict("Api-Key not valid");
-        }
-
-        if (!apiKeyEntity.IsActive)
+        if (!apiKey.IsActive)
         {
             return ServiceError.Conflict("Api-Key is inactive");
         }
 
-        if (apiKeyEntity.ExpiresAt.HasValue && apiKeyEntity.ExpiresAt.Value < DateTime.UtcNow)
+        if (apiKey.ExpiresAt.HasValue && apiKey.ExpiresAt.Value < DateTime.UtcNow)
         {
             return ServiceError.Conflict("Api-Key has expired");
         }
 
-        await unitOfWork.ApiKeys.UpdateLastUsedAsync(apiKeyEntity.Id, DateTime.UtcNow);
-        await unitOfWork.SaveChangesAsync();
-
-        return new ApiKeyValidationResult
-        {
-            ApiKeyId = apiKeyEntity.Id,
-            Claims = apiKeyEntity.Claims
-        };
-    }
-
-    private static string ComputeHash(string input)
-    {
-        var bytes = Encoding.UTF8.GetBytes(input);
-        var hashBytes = SHA256.HashData(bytes);
-        return Convert.ToBase64String(hashBytes);
-    }
-
-}
-
-internal static class ApiKeyExtensions
-{
-    public static ApiKeyInfo MapToInfo(this ApiKey apiKey)
-    {
-        return new ApiKeyInfo
-        {
-            Id = apiKey.Id,
-            Name = apiKey.Name,
-            CreatedAt = apiKey.CreatedAt,
-            ExpiresAt = apiKey.ExpiresAt,
-            IsActive = apiKey.IsActive,
-            LastUsedAt = apiKey.LastUsedAt,
-            Claims = apiKey.Claims
-        };
+        return Result.Success;
     }
 }
