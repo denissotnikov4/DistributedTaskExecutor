@@ -4,26 +4,34 @@ using System.Text.Json;
 using ApiKeysService.Client.Models;
 using ApiKeysService.Dal.Models;
 using ApiKeysService.Dal.Repositories;
+using Core.Results;
+using Microsoft.Extensions.Logging;
 
 namespace ApiKeysService.Logic.Services;
 
 public interface IApiKeysService
 {
-    Task<ApiKeyCreateResponse> CreateApiKeyAsync(ApiKeyCreateRequest request,
+    Task<Result<ApiKeyCreateResponse>> CreateApiKeyAsync(ApiKeyCreateRequest request,
         CancellationToken cancellationToken = default);
 
-    Task<ApiKeyInfo?> GetApiKeyInfoAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ICollection<ApiKeyInfo>> GetAllApiKeysAsync(CancellationToken cancellationToken = default);
-    Task UpdateApiKeyAsync(Guid id, ApiKeyUpdateRequest request, CancellationToken cancellationToken = default);
-    Task DeleteApiKeyAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ApiKeyValidationResult> ValidateApiKeyAsync(string apiKey, CancellationToken cancellationToken = default);
+    Task<Result<ApiKeyInfo>> GetApiKeyInfoAsync(Guid id, CancellationToken cancellationToken = default);
+    Task<Result<ICollection<ApiKeyInfo>>> GetAllApiKeysAsync(CancellationToken cancellationToken = default);
+    Task<Result> UpdateApiKeyAsync(Guid id, ApiKeyUpdateRequest request, CancellationToken cancellationToken = default);
+    Task<Result> DeleteApiKeyAsync(Guid id, CancellationToken cancellationToken = default);
+
+    Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(
+        string apiKey, CancellationToken cancellationToken = default);
 }
 
-public class ApiKeysService(IApiKeysRepository repository) : IApiKeysService
+public class ApiKeysService(
+    IApiKeysRepository repository,
+    ILogger<ApiKeysService> logger
+)
+    : IApiKeysService
 {
     private const int KeyLengthInBytes = 32;
 
-    public async Task<ApiKeyCreateResponse> CreateApiKeyAsync(ApiKeyCreateRequest request,
+    public async Task<Result<ApiKeyCreateResponse>> CreateApiKeyAsync(ApiKeyCreateRequest request,
         CancellationToken cancellationToken = default)
     {
         var apiKeyBytes = new byte[KeyLengthInBytes];
@@ -66,7 +74,9 @@ public class ApiKeysService(IApiKeysRepository repository) : IApiKeysService
 
         await repository.CreateAsync(apiKeyEntity, cancellationToken);
 
-        var info = MapToInfo(apiKeyEntity);
+        var info = apiKeyEntity.MapToInfo();
+
+        logger.LogInformation("API key created with id: {ApiKeyId}", apiKeyEntity.Id);
 
         return new ApiKeyCreateResponse
         {
@@ -76,25 +86,31 @@ public class ApiKeysService(IApiKeysRepository repository) : IApiKeysService
         };
     }
 
-    public async Task<ApiKeyInfo?> GetApiKeyInfoAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result<ApiKeyInfo>> GetApiKeyInfoAsync(Guid id, CancellationToken cancellationToken = default)
     {
         var apiKey = await repository.GetByIdAsync(id, cancellationToken);
-        return apiKey != null ? MapToInfo(apiKey) : null;
+
+        if (apiKey == null)
+        {
+            return ServiceError.NotFound($"Api-Key with id {id} not found");
+        }
+
+        return apiKey.MapToInfo();
     }
 
-    public async Task<ICollection<ApiKeyInfo>> GetAllApiKeysAsync(CancellationToken cancellationToken = default)
+    public async Task<Result<ICollection<ApiKeyInfo>>> GetAllApiKeysAsync(CancellationToken cancellationToken = default)
     {
         var apiKeys = await repository.GetAllAsync(cancellationToken);
-        return apiKeys.Select(MapToInfo).ToList();
+        return apiKeys.Select(x => x.MapToInfo()).ToList();
     }
 
-    public async Task UpdateApiKeyAsync(Guid id, ApiKeyUpdateRequest request,
+    public async Task<Result> UpdateApiKeyAsync(Guid id, ApiKeyUpdateRequest request,
         CancellationToken cancellationToken = default)
     {
         var apiKey = await repository.GetByIdAsync(id, cancellationToken);
         if (apiKey == null)
         {
-            throw new KeyNotFoundException($"API key with id {id} not found");
+            return ServiceError.NotFound($"API key with id {id} not found");
         }
 
         if (request.Name != null)
@@ -133,14 +149,20 @@ public class ApiKeysService(IApiKeysRepository repository) : IApiKeysService
         }
 
         await repository.UpdateAsync(apiKey, cancellationToken);
+        logger.LogInformation("Api-Key updated with id: {ApiKeyId}", id);
+        
+        return Result.Success;
     }
 
-    public async Task DeleteApiKeyAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<Result> DeleteApiKeyAsync(Guid id, CancellationToken cancellationToken = default)
     {
         await repository.DeleteAsync(id, cancellationToken);
+        logger.LogInformation("Api-Key deleted with id: {ApiKeyId}", id);
+        
+        return Result.Success;
     }
 
-    public async Task<ApiKeyValidationResult> ValidateApiKeyAsync(string apiKey,
+    public async Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(string apiKey,
         CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrWhiteSpace(apiKey))
@@ -205,8 +227,11 @@ public class ApiKeysService(IApiKeysRepository repository) : IApiKeysService
         var hashBytes = SHA256.HashData(bytes);
         return Convert.ToBase64String(hashBytes);
     }
+}
 
-    private static ApiKeyInfo MapToInfo(ApiKey apiKey)
+internal static class ApiKeyExtensions
+{
+    public static ApiKeyInfo MapToInfo(this ApiKey apiKey)
     {
         var claims = apiKey.Claims.ToDictionary(c => c.ClaimType, c => c.ClaimValue);
 
