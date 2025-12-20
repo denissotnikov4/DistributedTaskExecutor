@@ -4,7 +4,7 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ApiKeyService.Dal</RootNamespace>
+        <RootNamespace>ApiKeysService.Dal</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
@@ -17,14 +17,6 @@
         <PackageReference Include="System.Text.Json" Version="10.0.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <ProjectReference Include="..\ApiKeysService.Client\ApiKeysService.Client.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Compile Remove="Repositories\IApiKeyRepository.cs" />
-      <Compile Remove="Migrations\ApiKeyDbContextModelSnapshot.cs" />
-    </ItemGroup>
 
 </Project>
 

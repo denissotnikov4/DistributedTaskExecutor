@@ -4,14 +4,11 @@
         <TargetFramework>net8.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <RootNamespace>ApiKeyService.Client</RootNamespace>
     </PropertyGroup>
 
     <ItemGroup>
-      <Compile Remove="Models\ApiKeyValidationResult.cs" />
-      <Compile Remove="Models\ApiKeyUpdateRequest.cs" />
-      <Compile Remove="Models\ApiKeyInfo.cs" />
-      <Compile Remove="Models\ApiKeyCreateResponse.cs" />
+        <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+        <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
     </ItemGroup>
 
 </Project>
