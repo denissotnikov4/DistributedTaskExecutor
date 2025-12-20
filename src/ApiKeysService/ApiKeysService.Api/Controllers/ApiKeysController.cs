@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using ApiKeysService.Client.Models;
 using ApiKeysService.Logic.Services;
 using Core.Results;
@@ -7,15 +8,15 @@ namespace ApiKeysService.Api.Controllers;
 
 [ApiController]
 [Route("api/apikeys")]
-public class ApiKeysController(IApiKeysService apiKeysService, ILogger<ApiKeysController> logger) : ControllerBase
+public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 {
     /// <summary>
     /// Создать новый API-ключ
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(ApiKeyCreateResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> CreateApiKey([FromBody] ApiKeyCreateRequest request,
+    public async Task<IActionResult> CreateApiKey(
+        [FromBody] ApiKeyCreateRequest request,
         CancellationToken cancellationToken)
     {
         var result = await apiKeysService.CreateApiKeyAsync(request, cancellationToken);
@@ -31,7 +32,7 @@ public class ApiKeysController(IApiKeysService apiKeysService, ILogger<ApiKeysCo
     /// </summary>
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ApiKeyInfo), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetApiKey(Guid id, CancellationToken cancellationToken)
     {
         var result = await apiKeysService.GetApiKeyInfoAsync(id, cancellationToken);
@@ -52,11 +53,12 @@ public class ApiKeysController(IApiKeysService apiKeysService, ILogger<ApiKeysCo
     /// <summary>
     /// Обновить API-ключ
     /// </summary>
-    [HttpPut("{id}")]
+    [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UpdateApiKey(Guid id, [FromBody] ApiKeyUpdateRequest request,
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> UpdateApiKey(
+        Guid id,
+        [FromBody] ApiKeyUpdateRequest request,
         CancellationToken cancellationToken)
     {
         var result = await apiKeysService.UpdateApiKeyAsync(id, request, cancellationToken);
@@ -68,7 +70,7 @@ public class ApiKeysController(IApiKeysService apiKeysService, ILogger<ApiKeysCo
     /// </summary>
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
     public async Task<IActionResult> DeleteApiKey(Guid id, CancellationToken cancellationToken)
     {
         var result = await apiKeysService.DeleteApiKeyAsync(id, cancellationToken);
@@ -80,15 +82,12 @@ public class ApiKeysController(IApiKeysService apiKeysService, ILogger<ApiKeysCo
     /// </summary>
     [HttpPost("validate")]
     [ProducesResponseType(typeof(ApiKeyValidationResult), StatusCodes.Status200OK)]
-    public async Task<IActionResult> ValidateApiKey([FromBody] ValidateApiKeyRequest request,
+    [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> ValidateApiKey(
+        [FromBody] [Required] string apiKey,
         CancellationToken cancellationToken)
     {
-        var result = await apiKeysService.ValidateApiKeyAsync(request.ApiKey, cancellationToken);
-        return Ok(result);
+        var result = await apiKeysService.ValidateApiKeyAsync(apiKey, cancellationToken);
+        return result.ToActionResult(this);
     }
-}
-
-public class ValidateApiKeyRequest
-{
-    public string ApiKey { get; set; } = string.Empty;
 }

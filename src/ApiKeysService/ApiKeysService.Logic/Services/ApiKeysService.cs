@@ -76,7 +76,7 @@ public class ApiKeysService(
 
         var info = apiKeyEntity.MapToInfo();
 
-        logger.LogInformation("API key created with id: {ApiKeyId}", apiKeyEntity.Id);
+        logger.LogInformation("Api-Key created with id: {ApiKeyId}", apiKeyEntity.Id);
 
         return new ApiKeyCreateResponse
         {
@@ -110,7 +110,7 @@ public class ApiKeysService(
         var apiKey = await repository.GetByIdAsync(id, cancellationToken);
         if (apiKey == null)
         {
-            return ServiceError.NotFound($"API key with id {id} not found");
+            return ServiceError.NotFound($"Api-Key with id {id} not found");
         }
 
         if (request.Name != null)
@@ -130,10 +130,8 @@ public class ApiKeysService(
 
         if (request.Claims != null)
         {
-            // Удаляем старые клеймы
             apiKey.Claims.Clear();
 
-            // Добавляем новые клеймы
             foreach (var claim in request.Claims)
             {
                 apiKey.Claims.Add(new ApiKeyClaim
@@ -162,51 +160,26 @@ public class ApiKeysService(
         return Result.Success;
     }
 
-    public async Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(string apiKey,
-        CancellationToken cancellationToken = default)
+    public async Task<Result<ApiKeyValidationResult>> ValidateApiKeyAsync(
+        string apiKey, CancellationToken cancellationToken = default)
     {
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            return new ApiKeyValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "API key is empty"
-            };
-        }
-
-        // Хэшируем предоставленный ключ
         var keyHash = ComputeHash(apiKey);
 
-        // Ищем ключ в базе
         var apiKeyEntity = await repository.GetByKeyHashAsync(keyHash, cancellationToken);
 
         if (apiKeyEntity == null)
         {
-            return new ApiKeyValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "API key not found"
-            };
+            return ServiceError.Conflict("Api-Key not valid");
         }
 
-        // Проверяем активность
         if (!apiKeyEntity.IsActive)
         {
-            return new ApiKeyValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "API key is inactive"
-            };
+            return ServiceError.Conflict("Api-Key is inactive");
         }
 
-        // Проверяем срок действия
         if (apiKeyEntity.ExpiresAt.HasValue && apiKeyEntity.ExpiresAt.Value < DateTime.UtcNow)
         {
-            return new ApiKeyValidationResult
-            {
-                IsValid = false,
-                ErrorMessage = "API key has expired"
-            };
+            return ServiceError.Conflict("Api-Key has expired");
         }
 
         await repository.UpdateLastUsedAsync(apiKeyEntity.Id, DateTime.UtcNow, cancellationToken);
@@ -215,7 +188,6 @@ public class ApiKeysService(
 
         return new ApiKeyValidationResult
         {
-            IsValid = true,
             ApiKeyId = apiKeyEntity.Id,
             Claims = claims
         };
