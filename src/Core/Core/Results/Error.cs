@@ -8,6 +8,6 @@ public class Error
     {
         Message = message;
     }
-    
+
     public static Error Failure(string message = "") => new(message);
 }
