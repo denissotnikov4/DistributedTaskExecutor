@@ -6,65 +6,59 @@ namespace ApiKeysService.Dal.Repositories;
 
 public interface IApiKeysRepository
 {
-    Task<ApiKey?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default);
-    Task<ApiKey?> GetByKeyHashAsync(string keyHash, CancellationToken cancellationToken = default);
-    Task<ICollection<ApiKey>> GetAllAsync(CancellationToken cancellationToken = default);
-    Task<Guid> CreateAsync(ApiKey apiKey, CancellationToken cancellationToken = default);
-    Task UpdateAsync(ApiKey apiKey, CancellationToken cancellationToken = default);
-    Task DeleteAsync(Guid id, CancellationToken cancellationToken = default);
-    Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt, CancellationToken cancellationToken = default);
+    Task<ApiKey?> GetByIdAsync(Guid id);
+    Task<ApiKey?> GetByKeyHashAsync(string keyHash);
+    Task<ICollection<ApiKey>> GetAllAsync();
+    Guid Create(ApiKey apiKey);
+    void Update(ApiKey apiKey);
+    Task DeleteAsync(Guid id);
+    Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt);
 }
 
 public class ApiKeysRepository(ApiKeyDbContext context) : IApiKeysRepository
 {
-    public async Task<ApiKey?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task<ApiKey?> GetByIdAsync(Guid id)
     {
-        return await context.ApiKeys
-            .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
+        return await context.ApiKeys.FirstOrDefaultAsync(k => k.Id == id);
     }
 
-    public async Task<ApiKey?> GetByKeyHashAsync(string keyHash, CancellationToken cancellationToken = default)
+    public async Task<ApiKey?> GetByKeyHashAsync(string keyHash)
     {
-        return await context.ApiKeys
-            .FirstOrDefaultAsync(k => k.KeyHash == keyHash, cancellationToken);
+        return await context.ApiKeys.FirstOrDefaultAsync(k => k.KeyHash == keyHash);
     }
 
-    public async Task<ICollection<ApiKey>> GetAllAsync(CancellationToken cancellationToken = default)
+    public async Task<ICollection<ApiKey>> GetAllAsync()
     {
-        return await context.ApiKeys
-            .ToListAsync(cancellationToken);
+        return await context.ApiKeys.ToListAsync();
     }
 
-    public async Task<Guid> CreateAsync(ApiKey apiKey, CancellationToken cancellationToken = default)
+    public Guid Create(ApiKey apiKey)
     {
-        await context.ApiKeys.AddAsync(apiKey, cancellationToken);
-        await context.SaveChangesAsync(cancellationToken);
+        context.ApiKeys.Add(apiKey);
         return apiKey.Id;
     }
 
-    public async Task UpdateAsync(ApiKey apiKey, CancellationToken cancellationToken = default)
+    public void Update(ApiKey apiKey)
     {
         context.ApiKeys.Update(apiKey);
-        await context.SaveChangesAsync(cancellationToken);
     }
 
-    public async Task DeleteAsync(Guid id, CancellationToken cancellationToken = default)
+    public async Task DeleteAsync(Guid id)
     {
-        var apiKey = await GetByIdAsync(id, cancellationToken);
+        var apiKey = await GetByIdAsync(id);
         if (apiKey != null)
         {
             context.ApiKeys.Remove(apiKey);
-            await context.SaveChangesAsync(cancellationToken);
         }
     }
 
-    public async Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt, CancellationToken cancellationToken = default)
+    public async Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt)
     {
-        var apiKey = await context.ApiKeys.FindAsync([id], cancellationToken);
+        var apiKey = await context.ApiKeys.FindAsync(id);
         if (apiKey != null)
         {
             apiKey.LastUsedAt = lastUsedAt;
-            await context.SaveChangesAsync(cancellationToken);
+            context.ApiKeys.Update(apiKey);
         }
     }
 }
