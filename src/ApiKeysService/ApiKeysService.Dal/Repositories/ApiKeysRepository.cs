@@ -20,21 +20,18 @@ public class ApiKeysRepository(ApiKeyDbContext context) : IApiKeysRepository
     public async Task<ApiKey?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await context.ApiKeys
-            .Include(k => k.Claims)
             .FirstOrDefaultAsync(k => k.Id == id, cancellationToken);
     }
 
     public async Task<ApiKey?> GetByKeyHashAsync(string keyHash, CancellationToken cancellationToken = default)
     {
         return await context.ApiKeys
-            .Include(k => k.Claims)
             .FirstOrDefaultAsync(k => k.KeyHash == keyHash, cancellationToken);
     }
 
     public async Task<ICollection<ApiKey>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         return await context.ApiKeys
-            .Include(k => k.Claims)
             .ToListAsync(cancellationToken);
     }
 

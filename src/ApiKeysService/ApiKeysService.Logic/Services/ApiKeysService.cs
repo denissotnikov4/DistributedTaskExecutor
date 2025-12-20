@@ -1,6 +1,5 @@
 using System.Security.Cryptography;
 using System.Text;
-using System.Text.Json;
 using ApiKeysService.Client.Models;
 using ApiKeysService.Dal.Models;
 using ApiKeysService.Dal.Repositories;
@@ -54,22 +53,12 @@ public class ApiKeysService(
             Name = request.Name,
             CreatedAt = DateTime.UtcNow,
             ExpiresAt = request.ExpiresAt,
-            IsActive = true,
-            ClaimsJson = request.Claims != null ? JsonSerializer.Serialize(request.Claims) : null
+            IsActive = true
         };
 
-        if (request.Claims != null)
+        if (request.Claims != null && request.Claims.Count > 0)
         {
-            foreach (var claim in request.Claims)
-            {
-                apiKeyEntity.Claims.Add(new ApiKeyClaim
-                {
-                    Id = Guid.NewGuid(),
-                    ApiKeyId = apiKeyEntity.Id,
-                    ClaimType = claim.Key,
-                    ClaimValue = claim.Value
-                });
-            }
+            apiKeyEntity.Claims = request.Claims;
         }
 
         await repository.CreateAsync(apiKeyEntity, cancellationToken);
@@ -130,20 +119,7 @@ public class ApiKeysService(
 
         if (request.Claims != null)
         {
-            apiKey.Claims.Clear();
-
-            foreach (var claim in request.Claims)
-            {
-                apiKey.Claims.Add(new ApiKeyClaim
-                {
-                    Id = Guid.NewGuid(),
-                    ApiKeyId = apiKey.Id,
-                    ClaimType = claim.Key,
-                    ClaimValue = claim.Value
-                });
-            }
-
-            apiKey.ClaimsJson = JsonSerializer.Serialize(request.Claims);
+            apiKey.Claims = request.Claims;
         }
 
         await repository.UpdateAsync(apiKey, cancellationToken);
@@ -184,12 +160,10 @@ public class ApiKeysService(
 
         await repository.UpdateLastUsedAsync(apiKeyEntity.Id, DateTime.UtcNow, cancellationToken);
 
-        var claims = apiKeyEntity.Claims.ToDictionary(c => c.ClaimType, c => c.ClaimValue);
-
         return new ApiKeyValidationResult
         {
             ApiKeyId = apiKeyEntity.Id,
-            Claims = claims
+            Claims = apiKeyEntity.Claims
         };
     }
 
@@ -199,14 +173,13 @@ public class ApiKeysService(
         var hashBytes = SHA256.HashData(bytes);
         return Convert.ToBase64String(hashBytes);
     }
+
 }
 
 internal static class ApiKeyExtensions
 {
     public static ApiKeyInfo MapToInfo(this ApiKey apiKey)
     {
-        var claims = apiKey.Claims.ToDictionary(c => c.ClaimType, c => c.ClaimValue);
-
         return new ApiKeyInfo
         {
             Id = apiKey.Id,
@@ -215,7 +188,7 @@ internal static class ApiKeyExtensions
             ExpiresAt = apiKey.ExpiresAt,
             IsActive = apiKey.IsActive,
             LastUsedAt = apiKey.LastUsedAt,
-            Claims = claims
+            Claims = apiKey.Claims
         };
     }
 }

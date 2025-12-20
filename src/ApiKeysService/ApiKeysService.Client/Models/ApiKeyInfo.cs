@@ -8,6 +8,6 @@ public class ApiKeyInfo
     public DateTime? ExpiresAt { get; set; }
     public bool IsActive { get; set; }
     public DateTime? LastUsedAt { get; set; }
-    public Dictionary<string, string> Claims { get; set; } = new();
+    public List<string> Claims { get; set; } = new();
 }
 

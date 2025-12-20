@@ -35,12 +35,7 @@ public class ApiKey
     public DateTime? LastUsedAt { get; set; }
 
     /// <summary>
-    /// Клеймы (claims) ключа в формате JSON
+    /// Клеймы (claims) ключа как массив строк
     /// </summary>
-    public string? ClaimsJson { get; set; }
-
-    /// <summary>
-    /// Навигационное свойство для клеймов
-    /// </summary>
-    public ICollection<ApiKeyClaim> Claims { get; set; } = new List<ApiKeyClaim>();
+    public List<string> Claims { get; set; } = new();
 }
