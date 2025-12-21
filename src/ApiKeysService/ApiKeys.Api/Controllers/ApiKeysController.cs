@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using ApiKeys.Api.Configuration;
 using ApiKeys.Client.Models;
 using ApiKeys.Logic.Services.ApiKeys;
 using Core.Results;
@@ -9,7 +10,7 @@ namespace ApiKeys.Api.Controllers;
 
 [ApiController]
 [Route("api/apikeys")]
-[Authorize(Policy = "ManageApiKey")]
+[Authorize(Policy = AuthPolicies.ManageApiKey)]
 public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 {
     /// <summary>

@@ -1,3 +1,4 @@
+using ApiKeys.Api.Configuration;
 using ApiKeys.Api.DI;
 using Core.Auth;
 using Core.Swagger;
@@ -33,8 +34,8 @@ builder.Services.AddJwtAuth(builder.Configuration);
 
 builder.Services.AddAuthorization(options =>
 {
-    options.AddPolicy("ManageApiKey", policy => 
-        policy.RequireClaim("claim", "ManageApiKey"));
+    options.AddPolicy(AuthPolicies.ManageApiKey, policy => 
+        policy.RequireClaim("claim", Claims.ManageApiKey));
 });
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
