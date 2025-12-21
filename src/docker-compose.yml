@@ -18,6 +18,23 @@ services:
       timeout: 5s
       retries: 5
 
+  postgres-apikeys:
+    image: postgres:15-alpine
+    container_name: apikeys-postgres
+    environment:
+      POSTGRES_DB: apikeys
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_apikeys_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
   rabbitmq:
     image: rabbitmq:3-management-alpine
     container_name: taskmanagement-rabbitmq
@@ -37,5 +54,6 @@ services:
 
 volumes:
   postgres_data:
+  postgres_apikeys_data:
   rabbitmq_data:
 
