@@ -5,20 +5,6 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <RootNamespace>ApiKeys.Client</RootNamespace>
-        
-        <!-- NuGet Package Metadata -->
-        <PackageId>ApiKeys.Client</PackageId>
-        <Version>1.0.0</Version>
-        <Authors>antaif</Authors>
-        <Company>DistributedTaskExecutor</Company>
-        <Description>Client library for ApiKeysService in DistributedTaskExecutor project.</Description>
-        <PackageTags>DistributedTaskExecutor,ApiKeysService</PackageTags>
-        <PackageLicenseExpression>MIT</PackageLicenseExpression>
-        <RepositoryUrl>https://github.com/denissotnikov4/DistributedTaskExecutor</RepositoryUrl>
-        <PackageProjectUrl>https://github.com/denissotnikov4/DistributedTaskExecutor</PackageProjectUrl>
-        <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-        <IncludeSymbols>true</IncludeSymbols>
-        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     </PropertyGroup>
 
     <ItemGroup>
