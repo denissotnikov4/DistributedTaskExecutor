@@ -1,7 +1,7 @@
 using ApiKeys.Client.Models;
 using ApiKeys.Dal.Models;
 
-namespace ApiKeys.Logic.Services;
+namespace ApiKeys.Logic.Services.ApiKeys;
 
 internal static class ApiKeyExtensions
 {

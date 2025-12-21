@@ -8,6 +8,9 @@ public class MainDiModule : IDiModule
     {
         new RepositoriesDiModule().RegisterIn(services, configuration);
         new ServicesDiModule().RegisterIn(services, configuration);
+        new OptionsDiModule().RegisterIn(services, configuration);
+        new AuthDiModule().RegisterIn(services, configuration);
+        new SwaggerDiModule().RegisterIn(services, configuration);
     }
 }
 

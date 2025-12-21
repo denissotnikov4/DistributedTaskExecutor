@@ -1,28 +1,19 @@
 using ApiKeys.Api.DI;
-using Microsoft.OpenApi.Models;
+using Core.Configuration;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
+EnvLoader.LoadEnvFile();
+
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
     .CreateLogger();
 
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(configure =>
-{
-    configure.SwaggerDoc("v1", new OpenApiInfo
-    {
-        Title = "API Keys Service API",
-        Version = "v1",
-        Description = "API для управления API-ключами с поддержкой claims"
-    });
-});
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
 
@@ -43,10 +34,9 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-Log.Information("API Keys Service started.");
 
 app.Run();

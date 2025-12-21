@@ -1,7 +1,7 @@
 using ApiKeys.Dal.Data;
 using ApiKeys.Dal.Repositories;
+using Core.Database;
 using Core.DI;
-using Microsoft.EntityFrameworkCore;
 
 namespace ApiKeys.Api.DI;
 
@@ -9,10 +9,7 @@ public class RepositoriesDiModule : IDiModule
 {
     public void RegisterIn(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<ApiKeyDbContext>(options =>
-            options.UseNpgsql(
-                configuration.GetConnectionString("DefaultConnection"),
-                builder => builder.MigrationsAssembly("ApiKeys.Dal")));
+        services.AddNpgsqlDbContext<ApiKeyDbContext>("API_KEYS_CONNECTION_STRING");
 
         services.AddScoped<IApiKeysRepository, ApiKeysRepository>();
         

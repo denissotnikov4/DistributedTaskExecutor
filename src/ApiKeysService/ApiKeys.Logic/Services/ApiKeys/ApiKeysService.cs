@@ -4,7 +4,7 @@ using ApiKeys.Dal.Repositories;
 using Core.Results;
 using Microsoft.Extensions.Logging;
 
-namespace ApiKeys.Logic.Services;
+namespace ApiKeys.Logic.Services.ApiKeys;
 
 public interface IApiKeysService
 {

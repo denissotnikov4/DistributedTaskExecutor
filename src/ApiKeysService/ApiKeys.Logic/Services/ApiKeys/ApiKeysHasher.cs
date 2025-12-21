@@ -1,7 +1,7 @@
 using System.Security.Cryptography;
 using System.Text;
 
-namespace ApiKeys.Logic.Services;
+namespace ApiKeys.Logic.Services.ApiKeys;
 
 public static class ApiKeysHasher
 {
