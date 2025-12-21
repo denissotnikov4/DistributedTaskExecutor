@@ -1,4 +1,5 @@
 using ApiKeys.Client.Auth;
+using ApiKeys.Client.Extensions;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ExampleApiKeysService.Controllers;

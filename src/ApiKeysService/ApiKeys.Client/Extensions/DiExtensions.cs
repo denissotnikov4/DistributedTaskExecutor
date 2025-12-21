@@ -1,10 +1,11 @@
+using ApiKeys.Client.Auth;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace ApiKeys.Client.Auth;
+namespace ApiKeys.Client.Extensions;
 
-public static class ApiKeyAuthExtensions
+public static class DiExtensions
 {
     public static AuthenticationBuilder AddApiKeyAuthentication(
         this IServiceCollection services,

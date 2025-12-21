@@ -1,8 +1,9 @@
 using System.Security.Claims;
+using ApiKeys.Client.Auth;
 
-namespace ApiKeys.Client.Auth;
+namespace ApiKeys.Client.Extensions;
 
-public static class ApiKeyClaimsExtensions
+public static class ClaimsPrincipalExtensions
 {
     public static Guid? GetApiKeyId(
         this ClaimsPrincipal principal,
