@@ -1,13 +1,15 @@
 using System.ComponentModel.DataAnnotations;
 using ApiKeys.Client.Models;
-using ApiKeys.Logic.Services;
+using ApiKeys.Logic.Services.ApiKeys;
 using Core.Results;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ApiKeys.Api.Controllers;
 
 [ApiController]
 [Route("api/apikeys")]
+[Authorize(Policy = "ManageApiKey")]
 public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 {
     /// <summary>
@@ -15,6 +17,7 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
     /// </summary>
     [HttpPost]
     [ProducesResponseType(typeof(ApiKeyCreateResponse), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> CreateApiKey([FromBody] ApiKeyCreateRequest request)
     {
         var result = await apiKeysService.CreateApiKeyAsync(request);
@@ -50,10 +53,12 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 
     /// <summary>
     /// Обновить API-ключ
+    /// Требует claim "ManageApiKey"
     /// </summary>
     [HttpPut("{id:guid}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> UpdateApiKey(Guid id, [FromBody] ApiKeyUpdateRequest request)
     {
         var result = await apiKeysService.UpdateApiKeyAsync(id, request);
@@ -66,6 +71,7 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(string), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(string), StatusCodes.Status403Forbidden)]
     public async Task<IActionResult> DeleteApiKey(Guid id)
     {
         var result = await apiKeysService.DeleteApiKeyAsync(id);
@@ -76,6 +82,7 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
     /// Валидировать API-ключ
     /// </summary>
     [HttpPost("validate")]
+    [AllowAnonymous]
     [ProducesResponseType(typeof(ApiKeyValidationResult), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(string), StatusCodes.Status409Conflict)]
     public async Task<IActionResult> ValidateApiKey([FromBody] [Required] ValidateApiKeyRequest request)

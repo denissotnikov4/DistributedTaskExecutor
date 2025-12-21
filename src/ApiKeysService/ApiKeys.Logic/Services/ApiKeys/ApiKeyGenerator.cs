@@ -1,6 +1,6 @@
 using System.Security.Cryptography;
 
-namespace ApiKeys.Logic.Services;
+namespace ApiKeys.Logic.Services.ApiKeys;
 
 public interface IApiKeyGenerator
 {

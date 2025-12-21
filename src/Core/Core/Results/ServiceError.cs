@@ -18,4 +18,6 @@ public class ServiceError : Error
     public static ServiceError Forbidden(string message = "") => new(message, HttpStatusCode.Forbidden);
 
     public static ServiceError Conflict(string message = "") => new(message, HttpStatusCode.Conflict);
+
+    public static ServiceError Unauthorized(string message = "") => new(message, HttpStatusCode.Unauthorized);
 }

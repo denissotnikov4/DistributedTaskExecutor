@@ -1,4 +1,6 @@
 using ApiKeys.Api.DI;
+using Core.Auth;
+using Core.Swagger;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
@@ -13,15 +15,26 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
+
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen(configure =>
-{
-    configure.SwaggerDoc("v1", new OpenApiInfo
+builder.Services
+    .AddSwaggerGen(options =>
     {
-        Title = "API Keys Service API",
-        Version = "v1",
-        Description = "API для управления API-ключами с поддержкой claims"
+        options.SwaggerDoc("v1", new OpenApiInfo
+        {
+            Title = "API Keys Service API",
+            Version = "v1",
+            Description = "API для управления API-ключами с поддержкой claims"
+        });
+        options.AddJwtSecurity();
     });
+
+builder.Services.AddJwtAuth(builder.Configuration);
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("ManageApiKey", policy => 
+        policy.RequireClaim("claim", "ManageApiKey"));
 });
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
@@ -43,6 +56,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("AllowAll");
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
