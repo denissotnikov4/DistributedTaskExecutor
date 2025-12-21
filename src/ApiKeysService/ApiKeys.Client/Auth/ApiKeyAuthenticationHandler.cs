@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Encodings.Web;
 using ApiKeys.Client.Models;
+using Core.Results;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -11,9 +12,8 @@ public class ApiKeyAuthenticationHandler(
     IApiKeysClient apiKeysClient,
     IOptionsMonitor<ApiKeyAuthenticationOptions> options,
     ILoggerFactory logger,
-    UrlEncoder encoder,
-    ISystemClock clock)
-    : AuthenticationHandler<ApiKeyAuthenticationOptions>(options, logger, encoder, clock)
+    UrlEncoder encoder)
+    : AuthenticationHandler<ApiKeyAuthenticationOptions>(options, logger, encoder)
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
@@ -25,46 +25,52 @@ public class ApiKeyAuthenticationHandler(
             return AuthenticateResult.Fail("API key is required");
         }
 
-        try
-        {
-            var validationResult = await apiKeysClient.ValidateApiKeyAsync(new ValidateApiKeyRequest(apiKey));
+        var validationResult = await apiKeysClient.ValidateApiKeyAsync(new ValidateApiKeyRequest(apiKey));
 
-            if (validationResult.ApiKeyId is null)
+        if (validationResult.IsFailure)
+        {
+            if (validationResult.Error is ClientError clientError)
             {
-                Logger.LogWarning("API key validation failed: invalid key");
-                return AuthenticateResult.Fail("Invalid API key");
+                Logger.LogWarning(
+                    "API key validation failed: {StatusCode} - {Message}",
+                    clientError.StatusCode,
+                    clientError.Message);
+            }
+            else
+            {
+                Logger.LogWarning("API key validation failed: {Message}", validationResult.Error.Message);
             }
 
-            var claims = new List<Claim>
-            {
-                new(Options.ApiKeyIdClaimType, validationResult.ApiKeyId.Value.ToString())
-            };
+            return AuthenticateResult.Fail(validationResult.Error.Message);
+        }
 
-            if (validationResult.Claims is { Count: > 0 })
+        var result = validationResult.Value;
+
+        if (result.ApiKeyId is null)
+        {
+            Logger.LogWarning("API key validation failed: invalid key");
+            return AuthenticateResult.Fail("Invalid API key");
+        }
+
+        var claims = new List<Claim>
+        {
+            new(Options.ApiKeyIdClaimType, result.ApiKeyId.Value.ToString())
+        };
+
+        if (result.Claims is { Count: > 0 })
+        {
+            foreach (var claim in result.Claims)
             {
-                foreach (var claim in validationResult.Claims)
-                {
-                    claims.Add(new Claim(Options.ApiKeyClaimType, claim));
-                }
+                claims.Add(new Claim(Options.ApiKeyClaimType, claim));
             }
+        }
 
-            var identity = new ClaimsIdentity(claims, Options.SchemeName);
-            var principal = new ClaimsPrincipal(identity);
-            var ticket = new AuthenticationTicket(principal, Options.SchemeName);
+        var identity = new ClaimsIdentity(claims, Options.SchemeName);
+        var principal = new ClaimsPrincipal(identity);
+        var ticket = new AuthenticationTicket(principal, Options.SchemeName);
 
-            Logger.LogInformation("API key authenticated successfully: {ApiKeyId}", validationResult.ApiKeyId);
-            return AuthenticateResult.Success(ticket);
-        }
-        catch (HttpRequestException ex)
-        {
-            Logger.LogError(ex, "Error validating API key");
-            return AuthenticateResult.Fail($"API key validation error: {ex.Message}");
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Unexpected error during API key authentication");
-            return AuthenticateResult.Fail("Authentication failed");
-        }
+        Logger.LogInformation("API key authenticated successfully: {ApiKeyId}", result.ApiKeyId);
+        return AuthenticateResult.Success(ticket);
     }
 
     private string? GetApiKeyFromRequest()
