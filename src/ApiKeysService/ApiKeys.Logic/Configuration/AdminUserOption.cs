@@ -1,0 +1,10 @@
+namespace ApiKeys.Logic.Configuration;
+
+public class AdminUserOption
+{
+    public required string Username { get; set; }
+    
+    public required string Password { get; set; }
+    
+    public required IReadOnlyCollection<string> Claims { get; set; }
+}

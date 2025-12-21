@@ -1,9 +1,5 @@
-using ApiKeys.Api.Configuration;
 using ApiKeys.Api.DI;
-using Core.Auth;
 using Core.Configuration;
-using Core.Swagger;
-using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,27 +15,6 @@ Log.Logger = new LoggerConfiguration()
 builder.Host.UseSerilog();
 
 builder.Services.AddControllers();
-
-builder.Services.AddEndpointsApiExplorer();
-builder.Services
-    .AddSwaggerGen(options =>
-    {
-        options.SwaggerDoc("v1", new OpenApiInfo
-        {
-            Title = "API Keys Service API",
-            Version = "v1",
-            Description = "API для управления API-ключами с поддержкой claims"
-        });
-        options.AddJwtSecurity();
-    });
-
-builder.Services.AddJwtAuth(builder.Configuration);
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy(AuthPolicies.ManageApiKey, policy => 
-        policy.RequireClaim("claim", Claims.ManageApiKey));
-});
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
 

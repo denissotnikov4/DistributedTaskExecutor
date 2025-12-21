@@ -1,7 +1,8 @@
+using ApiKeys.Logic.Configuration;
 using ApiKeys.Logic.Models;
 using Core.Results;
-using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 
 namespace ApiKeys.Logic.Services.Auth;
 
@@ -12,46 +13,30 @@ public interface IAuthService
 
 public class AuthService(
     ITokenProvider tokenProvider,
-    IConfiguration configuration,
+    IOptions<AdminUserOption> adminUserOptions,
     ILogger<AuthService> logger
 )
     : IAuthService
 {
+    private readonly AdminUserOption adminUserOptions = adminUserOptions.Value;
+
+    // note: пока так, для демонстрации пойдет
     public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
     {
-        var users = configuration.GetSection("Auth:Users").Get<List<UserConfig>>()
-                    ?? new List<UserConfig>();
-
-        var user = users.FirstOrDefault(u =>
-            u.Username.Equals(request.Username, StringComparison.OrdinalIgnoreCase) &&
-            u.Password == request.Password);
-
-        if (user == null)
+        var adminUsername = adminUserOptions.Username;
+        var adminPassword = adminUserOptions.Password;
+        
+        if (!adminUsername.Equals(request.Username, StringComparison.OrdinalIgnoreCase)
+            || adminPassword != request.Password)
         {
             logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
             return ServiceError.Unauthorized("Invalid username or password");
         }
 
-        var claims = new HashSet<string> { "ManageApiKey" };
-        if (user.Claims != null)
-        {
-            foreach (var claim in user.Claims)
-            {
-                claims.Add(claim);
-            }
-        }
-
-        var token = tokenProvider.GenerateToken(request.Username, claims);
+        var token = tokenProvider.GenerateToken(request.Username, adminUserOptions.Claims);
 
         logger.LogInformation("User {Username} logged in successfully", request.Username);
 
         return new LoginResponse(token);
-    }
-
-    private class UserConfig
-    {
-        public string Username { get; set; } = string.Empty;
-        public string Password { get; set; } = string.Empty;
-        public List<string>? Claims { get; set; }
     }
 }
