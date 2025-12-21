@@ -28,10 +28,15 @@ public class ApiKeysClient(HttpClient httpClient) : IApiKeysClient
 
     public async Task<ApiKeyValidationResult> ValidateApiKeyAsync(string apiKey)
     {
-        var request = new { ApiKey = apiKey };
-        var response = await httpClient.PostAsJsonAsync($"{ApiKeysPath}/validate", request);
+        var response = await httpClient.PostAsJsonAsync($"{ApiKeysPath}/validate", apiKey);
         
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorMessage = await response.Content.ReadAsStringAsync();
+            throw new HttpRequestException(
+                $"API key validation failed with status {response.StatusCode}: {errorMessage}");
+        }
+        
         return await response.Content.ReadFromJsonAsync<ApiKeyValidationResult>()
                ?? throw new InvalidOperationException("Failed to deserialize response");
     }
