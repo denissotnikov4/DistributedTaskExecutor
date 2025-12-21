@@ -1,0 +1,19 @@
+using ApiKeys.Dal.Data;
+using ApiKeys.Dal.Repositories;
+using Core.Database;
+using Core.DI;
+
+namespace ApiKeys.Api.DI;
+
+public class RepositoriesDiModule : IDiModule
+{
+    public void RegisterIn(IServiceCollection services, IConfiguration configuration)
+    {
+        services.AddNpgsqlDbContext<ApiKeyDbContext>("API_KEYS_CONNECTION_STRING");
+
+        services.AddScoped<IApiKeysRepository, ApiKeysRepository>();
+        
+        services.AddScoped<IApiKeysUnitOfWork, ApiKeysUnitOfWork>();
+    }
+}
+
