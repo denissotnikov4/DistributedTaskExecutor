@@ -23,5 +23,9 @@
     <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
 </Project>
 

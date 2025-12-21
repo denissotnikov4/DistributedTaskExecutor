@@ -15,7 +15,7 @@ public class TaskRepository : ITaskRepository
 
     public async Task<ServerTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await this.context.Tasks.FindAsync(new object[] { id }, cancellationToken);
+        return await this.context.Tasks.FindAsync([id], cancellationToken);
     }
 
     public async Task<ICollection<ServerTask>> GetAllAsync(CancellationToken cancellationToken = default)

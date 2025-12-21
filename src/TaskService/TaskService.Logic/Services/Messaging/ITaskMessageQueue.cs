@@ -4,7 +4,7 @@ namespace TaskService.Logic.Services.Messaging;
 
 public interface ITaskMessageQueue
 {
-    Task PublishTaskAsync(Guid taskId, CancellationToken cancellationToken = default);
+    public Task PublishTaskAsync(ClientTask task, CancellationToken cancellationToken = default);
 
     Task<ClientTask?> ConsumeTaskAsync(CancellationToken cancellationToken = default);
 }
