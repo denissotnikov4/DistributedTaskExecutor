@@ -12,6 +12,6 @@ public class ServicesDiModule : IDiModule
         services.AddScoped<IApiKeyGenerator, ApiKeyGenerator>();
 
         services.AddScoped<IAuthService, AuthService>();
-        services.AddSingleton<IJwtTokenService, JwtTokenService>();
+        services.AddSingleton<ITokenProvider, JwtTokenProvider>();
     }
 }

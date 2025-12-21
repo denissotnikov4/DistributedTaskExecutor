@@ -1,11 +1,14 @@
 using ApiKeys.Api.Configuration;
 using ApiKeys.Api.DI;
 using Core.Auth;
+using Core.Configuration;
 using Core.Swagger;
 using Microsoft.OpenApi.Models;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
+
+EnvLoader.LoadEnvFile();
 
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)

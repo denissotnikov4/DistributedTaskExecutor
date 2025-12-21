@@ -1,3 +1,3 @@
 namespace ApiKeys.Logic.Models;
 
-public class LoginResponse(string JwtToken);
+public record LoginResponse(string JwtToken);

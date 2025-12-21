@@ -5,8 +5,13 @@ using Microsoft.Extensions.Logging;
 
 namespace ApiKeys.Logic.Services.Auth;
 
+public interface IAuthService
+{
+    Task<Result<LoginResponse>> LoginAsync(LoginRequest request);
+}
+
 public class AuthService(
-    IJwtTokenService jwtTokenService,
+    ITokenProvider tokenProvider,
     IConfiguration configuration,
     ILogger<AuthService> logger
 )
@@ -36,7 +41,7 @@ public class AuthService(
             }
         }
 
-        var token = jwtTokenService.GenerateToken(request.Username, claims);
+        var token = tokenProvider.GenerateToken(request.Username, claims);
 
         logger.LogInformation("User {Username} logged in successfully", request.Username);
 
