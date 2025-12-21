@@ -1,4 +1,6 @@
-﻿namespace WorkerService.Cli.Services.ProjectCreators.Base;
+﻿using TaskService.Client.Models.Tasks;
+
+namespace WorkerService.Cli.Services.ProjectCreators.Base;
 
 /// <summary>
 /// Класс, создающий проект с кодом для выбранного языка.
@@ -10,7 +12,7 @@ public interface IProjectCreator
     /// </summary>
     /// <param name="language"></param>
     /// <returns></returns>
-    bool Accept(string language);
+    bool Accept(ProgrammingLanguage language);
 
     /// <summary>
     /// Создать проект с кодом для выбранного языка.

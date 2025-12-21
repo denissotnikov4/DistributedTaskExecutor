@@ -1,12 +1,15 @@
-﻿using System.Reflection;
+﻿using System.Collections.Concurrent;
+using System.Reflection;
+using TaskService.Client.Models.Tasks;
+using WorkerService.Cli.Models;
 
 namespace WorkerService.Cli.Helpers;
 
 public static class ResourcesHelper
 {
-    private static readonly Dictionary<string, string> Cache = new();
+    private static readonly ConcurrentDictionary<string, string> Cache = new();
 
-    public static string GetResource(string resourceName)
+    public static async Task<string> GetResourceAsync(string resourceName, CancellationToken cancelToken = default)
     {
         if (Cache.TryGetValue(resourceName, out var value))
         {
@@ -19,13 +22,18 @@ public static class ResourcesHelper
             .GetManifestResourceNames()
             .Single(name => name.EndsWith(resourceName));
 
-        using var stream = assembly.GetManifestResourceStream(fullResourceName)!;
+        await using var stream = assembly.GetManifestResourceStream(fullResourceName)!;
         using var reader = new StreamReader(stream);
 
-        var resourceValue = reader.ReadToEnd();
+        var resourceValue = await reader.ReadToEndAsync(cancelToken);
 
         Cache[resourceName] = resourceValue;
 
         return resourceValue;
+    }
+
+    public static string GetDockerfileNameByProgrammingLanguage(ProgrammingLanguage language)
+    {
+        return $"{language.ToString().ToLower()}.{Constants.DockerFile}";
     }
 }

@@ -1,26 +1,18 @@
-﻿using WorkerService.Cli.Helpers;
-using WorkerService.Cli.Services.ProjectCreators.Models;
+﻿using TaskService.Client.Models.Tasks;
+using WorkerService.Cli.Models;
 
 namespace WorkerService.Cli.Services.ProjectCreators.Base;
 
 public abstract class ProjectCreatorBase : IProjectCreator
 {
-    private static readonly Dictionary<string, string> LanguagesEntryPoints = new()
-    {
-        [Constants.CSharp.LanguageName] = "Program.cs",
-        [Constants.Python.LanguageName] = "main.py"
-    };
+    private readonly ProgrammingLanguage supportedLanguage;
 
-    private readonly string supportedLanguage;
-    private readonly string dockerFile;
-
-    protected ProjectCreatorBase(string supportedLanguage)
+    protected ProjectCreatorBase(ProgrammingLanguage supportedLanguage)
     {
-        this.supportedLanguage = supportedLanguage ?? throw new ArgumentNullException(nameof(supportedLanguage));
-        this.dockerFile = $"{supportedLanguage}.Dockerfile";
+        this.supportedLanguage = supportedLanguage;
     }
 
-    public bool Accept(string language)
+    public bool Accept(ProgrammingLanguage language)
     {
         return language == this.supportedLanguage;
     }
@@ -33,32 +25,19 @@ public abstract class ProjectCreatorBase : IProjectCreator
 
         await this.AddCodeToProject(sourceCode, projectPath);
 
-        await this.AddDockerfileToProject(projectPath);
-
         return projectPath;
     }
 
     private static string CreateProjectDirectory(string name)
     {
-        var projectPath = Path.Combine(Path.GetTempPath(), name);
-
-        Directory.CreateDirectory(projectPath);
-
-        return projectPath;
+        return Directory.CreateDirectory(Path.Combine(Path.GetTempPath(), name)).FullName;
     }
 
     private async Task AddCodeToProject(string sourceCode, string projectPath)
     {
         await File.WriteAllTextAsync(
-            Path.Combine(projectPath, LanguagesEntryPoints[this.supportedLanguage]),
+            Path.Combine(projectPath, Constants.LanguagesEntryPoints[this.supportedLanguage]),
             sourceCode);
-    }
-
-    private async Task AddDockerfileToProject(string projectPath)
-    {
-        await File.WriteAllTextAsync(
-            Path.Combine(projectPath, "Dockerfile"),
-            ResourcesHelper.GetResource(this.dockerFile));
     }
 
     protected virtual Task InitProjectIfNeededAsync(string projectPath)

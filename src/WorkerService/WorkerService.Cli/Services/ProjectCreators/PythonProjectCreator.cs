@@ -1,12 +1,12 @@
-﻿using WorkerService.Cli.Services.ProjectCreators.Base;
-using WorkerService.Cli.Services.ProjectCreators.Models;
+﻿using TaskService.Client.Models.Tasks;
+using WorkerService.Cli.Services.ProjectCreators.Base;
 
 namespace WorkerService.Cli.Services.ProjectCreators;
 
 public class PythonProjectCreator : ProjectCreatorBase
 {
     public PythonProjectCreator()
-        : base(Constants.Python.LanguageName)
+        : base(ProgrammingLanguage.Python)
     {
     }
 }

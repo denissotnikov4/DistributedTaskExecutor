@@ -1,13 +1,14 @@
 ﻿using System.Diagnostics;
+using WorkerService.Cli.Models;
 
 namespace WorkerService.Cli.Helpers;
 
 public static class ProcessHelper
 {
-    public static async Task<(string? stdout, string? stderr, int exitCode)> RunProcessAsync(
+    public static async Task<RunProcessResult> RunProcessAsync(
         string fileName,
         string arguments,
-        string? input = null)
+        string? stdin = null)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -15,16 +16,16 @@ public static class ProcessHelper
             Arguments = arguments,
             RedirectStandardOutput = true,
             RedirectStandardError = true,
-            RedirectStandardInput = input != null,
+            RedirectStandardInput = stdin != null,
             UseShellExecute = false,
             CreateNoWindow = true
         };
 
         using var process = Process.Start(startInfo)!;
 
-        if (!string.IsNullOrEmpty(input))
+        if (!string.IsNullOrEmpty(stdin))
         {
-            await process.StandardInput.WriteAsync(input);
+            await process.StandardInput.WriteAsync(stdin);
             await process.StandardInput.FlushAsync();
 
             process.StandardInput.Close();
@@ -35,6 +36,11 @@ public static class ProcessHelper
         var stdout = await process.StandardOutput.ReadToEndAsync();
         var stderr = await process.StandardError.ReadToEndAsync();
 
-        return (stdout, stderr, process.ExitCode);
+        return new RunProcessResult
+        {
+            Stdout = stdout,
+            Stderr = stderr,
+            ExitCode = process.ExitCode
+        };
     }
 }
