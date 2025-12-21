@@ -9,7 +9,6 @@ EnvLoader.LoadEnvFile();
 Log.Logger = new LoggerConfiguration()
     .ReadFrom.Configuration(builder.Configuration)
     .Enrich.FromLogContext()
-    .WriteTo.Console()
     .CreateLogger();
 
 builder.Host.UseSerilog();
@@ -39,7 +38,5 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
-Log.Information("API Keys Service started.");
 
 app.Run();
