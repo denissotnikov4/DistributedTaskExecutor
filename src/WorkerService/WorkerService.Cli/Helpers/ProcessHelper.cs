@@ -8,7 +8,8 @@ public static class ProcessHelper
     public static async Task<RunProcessResult> RunProcessAsync(
         string fileName,
         string arguments,
-        string? stdin = null)
+        string? stdin = null,
+        TimeSpan? timeout = null)
     {
         var startInfo = new ProcessStartInfo
         {
@@ -31,16 +32,44 @@ public static class ProcessHelper
             process.StandardInput.Close();
         }
 
-        await process.WaitForExitAsync();
+        try
+        {
+            await process.WaitForExitAsync(
+                timeout is null ? CancellationToken.None : new CancellationTokenSource(timeout.Value).Token);
+        }
+        catch (Exception exception)
+        {
+            SafeKillProcess(process);
 
-        var stdout = await process.StandardOutput.ReadToEndAsync();
-        var stderr = await process.StandardError.ReadToEndAsync();
+            var errorMessage = exception is OperationCanceledException
+                ? "Process exceeded maximum execution time."
+                : $"Unknown exception occured. Error message: {exception.Message}.";
+
+            return new RunProcessResult
+            {
+                Stdout = null,
+                Stderr = errorMessage,
+                ExitCode = -1
+            };
+        }
 
         return new RunProcessResult
         {
-            Stdout = stdout,
-            Stderr = stderr,
+            Stdout = await process.StandardOutput.ReadToEndAsync(),
+            Stderr = await process.StandardError.ReadToEndAsync(),
             ExitCode = process.ExitCode
         };
+    }
+
+    private static void SafeKillProcess(Process process)
+    {
+        try
+        {
+            process.Kill(true);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 }

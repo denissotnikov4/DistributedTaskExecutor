@@ -10,6 +10,9 @@
     <ItemGroup>
       <PackageReference Include="Docker.DotNet" Version="3.125.15" />
       <PackageReference Include="TaskService.Client" Version="0.0.3" />
+      <PackageReference Include="Vostok.Configuration" Version="0.1.44" />
+      <PackageReference Include="Vostok.Configuration.Abstractions" Version="0.1.17" />
+      <PackageReference Include="Vostok.Configuration.Sources.Json" Version="0.1.9" />
     </ItemGroup>
 
     <ItemGroup>
@@ -17,6 +20,9 @@
       <EmbeddedResource Include="Resources\Dockerfiles\python.Dockerfile" />
       <None Remove="Resources\csharp.Dockerfile" />
       <None Remove="Resources\python.Dockerfile" />
+      <None Update="settings.json">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </None>
     </ItemGroup>
 
 </Project>

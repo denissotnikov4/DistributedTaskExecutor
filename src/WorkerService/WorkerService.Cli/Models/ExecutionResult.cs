@@ -2,7 +2,7 @@
 
 public class ExecutionResult
 {
-    public string? Output { get; set; }
+    public string? Output { get; init; }
 
-    public string? ErrorMessage { get; set; }
+    public string? ErrorMessage { get; init; }
 }

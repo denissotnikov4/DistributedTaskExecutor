@@ -8,46 +8,66 @@ public static class CommandsHelper
 {
     public static async Task<RunProcessResult> DotnetNew(
         string projectPath,
-        string projectName = Constants.DefaultProjectName,
-        string framework = "net8.0",
-        string languageVersion = "12.0")
+        string projectName,
+        string frameworkVersion,
+        string languageVersion)
     {
         return await ProcessHelper.RunProcessAsync(
             "dotnet",
-            $"new console --framework {framework} --langVersion {languageVersion} -o \"{projectPath}\" -n {projectName}");
+            $"new console --framework {frameworkVersion} --langVersion {languageVersion} -o \"{projectPath}\" -n {projectName}");
     }
 
-    public static async Task<RunProcessResult> DockerBuild(string imageName, string projectPath, bool quiet = true)
+    public static async Task<RunProcessResult> DockerBuild(
+        string imageName,
+        string projectPath,
+        bool quiet,
+        Dictionary<string, string>? buildArgs = null)
     {
-        return await ProcessHelper.RunProcessAsync(
-            "docker",
-            $"build -t {imageName} {(quiet ? "--quiet " : string.Empty)}\"{projectPath}\"");
+        var arguments = new StringBuilder($"build -t {imageName}");
+
+        if (quiet)
+        {
+            arguments.Append(" --quiet");
+        }
+
+        if (buildArgs != null)
+        {
+            foreach (var arg in buildArgs)
+            {
+                arguments.Append($" --build-arg {arg.Key}={arg.Value}");
+            }
+        }
+
+        arguments.Append($" \"{projectPath}\"");
+
+        return await ProcessHelper.RunProcessAsync("docker", arguments.ToString());
     }
 
     public static async Task<RunProcessResult> DockerRun(
         string imageName,
         string? input,
-        int memoryMb = 256,
-        double cpuLimit = 0.5,
-        int pidLimit = 100)
+        double cpuLimit,
+        int memoryMbLimit,
+        int pidLimit,
+        TimeSpan? timeout = null)
     {
-        var stringBuilder = new StringBuilder("run");
+        var arguments = new StringBuilder("run");
 
         if (!string.IsNullOrEmpty(input))
         {
-            stringBuilder.Append(" -i");
+            arguments.Append(" -i");
         }
 
-        stringBuilder.Append(" --rm");
-        stringBuilder.Append($" --memory {memoryMb}m");
-        stringBuilder.Append($" --cpus {cpuLimit.ToString(CultureInfo.InvariantCulture)}");
-        stringBuilder.Append(" --network none");
-        stringBuilder.Append(" --read-only");
-        stringBuilder.Append(" --security-opt no-new-privileges");
-        stringBuilder.Append($" --pids-limit {pidLimit}");
-        stringBuilder.Append($" {imageName}");
+        arguments.Append(" --rm");
+        arguments.Append($" --cpus {cpuLimit.ToString(CultureInfo.InvariantCulture)}");
+        arguments.Append($" --memory {memoryMbLimit}m");
+        arguments.Append(" --network none");
+        arguments.Append(" --read-only");
+        arguments.Append(" --security-opt no-new-privileges");
+        arguments.Append($" --pids-limit {pidLimit}");
+        arguments.Append($" {imageName}");
 
-        return await ProcessHelper.RunProcessAsync("docker", stringBuilder.ToString(), input);
+        return await ProcessHelper.RunProcessAsync("docker", arguments.ToString(), input, timeout);
     }
 
     public static async Task<RunProcessResult> DockerRmi(string imageName)
