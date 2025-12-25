@@ -1,5 +1,5 @@
-using TaskService.Client.Models.Requests;
 using TaskService.Client.Models.Tasks;
+using TaskService.Client.Models.Tasks.Requests;
 
 namespace TaskService.Logic.Services.Tasks;
 

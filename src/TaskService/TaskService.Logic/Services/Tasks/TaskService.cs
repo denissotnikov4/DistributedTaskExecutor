@@ -1,5 +1,5 @@
-using TaskService.Client.Models.Requests;
 using TaskService.Client.Models.Tasks;
+using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Dal.Repositories;
 using TaskService.Logic.Mappings;
 using TaskService.Logic.Services.Messaging;

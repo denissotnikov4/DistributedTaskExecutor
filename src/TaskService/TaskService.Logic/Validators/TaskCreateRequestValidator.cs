@@ -1,5 +1,5 @@
 using FluentValidation;
-using TaskService.Client.Models.Requests;
+using TaskService.Client.Models.Tasks.Requests;
 
 namespace TaskService.Logic.Validators;
 
