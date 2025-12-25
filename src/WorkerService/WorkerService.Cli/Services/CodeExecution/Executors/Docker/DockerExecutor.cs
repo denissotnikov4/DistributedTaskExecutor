@@ -5,14 +5,18 @@ using WorkerService.Cli.Models;
 using WorkerService.Cli.Services.CodeExecution.Executors.Base;
 using WorkerService.Cli.Settings.CodeExecution;
 
-namespace WorkerService.Cli.Services.CodeExecution.Executors;
+namespace WorkerService.Cli.Services.CodeExecution.Executors.Docker;
 
 public class DockerExecutor : ICodeExecutor
 {
+    private readonly IDockerBuildArgsFactory dockerBuildArgsFactory;
     private readonly CodeExecutionSettings executionSettings;
 
-    public DockerExecutor(CodeExecutionSettings executionSettings)
+    public DockerExecutor(
+        IDockerBuildArgsFactory dockerBuildArgsFactory,
+        CodeExecutionSettings executionSettings)
     {
+        this.dockerBuildArgsFactory = dockerBuildArgsFactory ?? throw new ArgumentNullException(nameof(dockerBuildArgsFactory));
         this.executionSettings = executionSettings ?? throw new ArgumentNullException(nameof(executionSettings));
     }
 
@@ -59,7 +63,7 @@ public class DockerExecutor : ICodeExecutor
         var dockerfileName = ResourcesHelper.GetDockerfileNameByProgrammingLanguage(language);
 
         await File.WriteAllTextAsync(
-            Path.Combine(projectPath, Constants.DockerFile),
+            Path.Combine(projectPath, Constants.DockerfileName),
             await ResourcesHelper.GetResourceAsync(dockerfileName));
     }
 
@@ -67,17 +71,8 @@ public class DockerExecutor : ICodeExecutor
     {
         return language switch
         {
-            ProgrammingLanguage.CSharp => new Dictionary<string, string>
-            {
-                ["SDK_IMAGE"] = this.executionSettings.CSharp.DotnetSdkImageName,
-                ["RUNTIME_IMAGE"] = this.executionSettings.CSharp.DotnetRuntimeImageName
-            },
-
-            ProgrammingLanguage.Python => new Dictionary<string, string>
-            {
-                ["LANGUAGE_IMAGE"] = this.executionSettings.Python.ImageName
-            },
-
+            ProgrammingLanguage.CSharp => this.dockerBuildArgsFactory.GetCSharpBuildArgs(this.executionSettings.CSharp),
+            ProgrammingLanguage.Python => this.dockerBuildArgsFactory.GetPythonBuildArgs(this.executionSettings.Python),
             _ => throw new ArgumentOutOfRangeException(
                 nameof(language),
                 "No docker build arguments defined for specified programming language.")

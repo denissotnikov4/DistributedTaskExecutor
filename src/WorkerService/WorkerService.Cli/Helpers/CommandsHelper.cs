@@ -6,17 +6,6 @@ namespace WorkerService.Cli.Helpers;
 
 public static class CommandsHelper
 {
-    public static async Task<RunProcessResult> DotnetNew(
-        string projectPath,
-        string projectName,
-        string frameworkVersion,
-        string languageVersion)
-    {
-        return await ProcessHelper.RunProcessAsync(
-            "dotnet",
-            $"new console --framework {frameworkVersion} --langVersion {languageVersion} -o \"{projectPath}\" -n {projectName}");
-    }
-
     public static async Task<RunProcessResult> DockerBuild(
         string imageName,
         string projectPath,

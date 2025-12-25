@@ -2,10 +2,6 @@
 using Vostok.Configuration.Sources.Combined;
 using Vostok.Configuration.Sources.Environment;
 using Vostok.Configuration.Sources.Json;
-using WorkerService.Cli.Services.CodeExecution;
-using WorkerService.Cli.Services.CodeExecution.Executors;
-using WorkerService.Cli.Services.ProjectCreators;
-using WorkerService.Cli.Services.ProjectCreators.Base;
 using WorkerService.Cli.Settings;
 
 namespace WorkerService.Cli;
@@ -14,17 +10,7 @@ public static class Program
 {
     public static async Task Main()
     {
-        var settings = GetServiceSettings();
-
-        var codeExecutionService = new CodeExecutionService(
-            new IProjectCreator[]
-            {
-                new CSharpProjectCreator(settings.CodeExecution.CSharp),
-                new PythonProjectCreator()
-            },
-            new DockerExecutor(settings.CodeExecution));
-
-        Console.WriteLine("App initialized.");
+        throw new NotImplementedException();
     }
 
     private static WorkerServiceSettings GetServiceSettings()

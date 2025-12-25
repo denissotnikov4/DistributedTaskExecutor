@@ -34,6 +34,6 @@ public static class ResourcesHelper
 
     public static string GetDockerfileNameByProgrammingLanguage(ProgrammingLanguage language)
     {
-        return $"{language.ToString().ToLower()}.{Constants.DockerFile}";
+        return $"{language.ToString().ToLower()}.{Constants.DockerfileName}";
     }
 }
