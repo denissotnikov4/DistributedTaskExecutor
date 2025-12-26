@@ -3,7 +3,7 @@ using ApiKeys.Dal.Models;
 
 namespace ApiKeys.Logic.Services.ApiKeys;
 
-internal static class ApiKeyExtensions
+public static class ApiKeyExtensions
 {
     public static ApiKeyInfo MapToInfo(this ApiKey apiKey)
     {
