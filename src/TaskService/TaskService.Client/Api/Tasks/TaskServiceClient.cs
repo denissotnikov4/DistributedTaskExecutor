@@ -13,8 +13,16 @@ public class TaskServiceClient : ITaskServiceClient
 
     public TaskServiceClient(string baseUrl, string apiKey, Action<LogLevel, string> log)
     {
-        ArgumentNullException.ThrowIfNull(baseUrl);
-        ArgumentNullException.ThrowIfNull(apiKey);
+        if (string.IsNullOrWhiteSpace(baseUrl))
+        {
+            throw new ArgumentNullException(nameof(baseUrl));
+        }
+
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new ArgumentNullException(nameof(apiKey));
+        }
+
         ArgumentNullException.ThrowIfNull(log);
 
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
@@ -29,11 +37,13 @@ public class TaskServiceClient : ITaskServiceClient
         {
             this.log(LogLevel.Info, $"Trying to GET Task by id \"{id}\".");
 
-            var response = await this.httpClient.GetAsync($"{ApiPath}/{id}", cancelToken);
+            var response = await this.httpClient.GetAsync($"{ApiPath}/{id}", cancelToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                var errorMessage = await response.Content.ReadAsStringAsync(cancelToken);
+                var errorMessage = await response.Content.ReadAsStringAsync(cancelToken)
+                    .ConfigureAwait(false);
 
                 this.log(
                     LogLevel.Error,
@@ -44,7 +54,8 @@ public class TaskServiceClient : ITaskServiceClient
 
             this.log(LogLevel.Info, $"Successfully GOT Task by id \"{id}\".");
 
-            var result = await response.Content.ReadFromJsonAsync<ClientTask>(cancellationToken: cancelToken);
+            var result = await response.Content.ReadFromJsonAsync<ClientTask>(cancellationToken: cancelToken)
+                .ConfigureAwait(false);
 
             return RequestResult<ClientTask>.Success(result!, (int)response.StatusCode);
         }
@@ -67,11 +78,13 @@ public class TaskServiceClient : ITaskServiceClient
         {
             this.log(LogLevel.Info, $"Trying to PATCH Task by id \"{id}\".");
 
-            var response = await this.httpClient.PatchAsJsonAsync($"{ApiPath}/{id}", updateRequest, cancelToken);
+            var response = await this.httpClient.PatchAsJsonAsync($"{ApiPath}/{id}", updateRequest, cancelToken)
+                .ConfigureAwait(false);
 
             if (!response.IsSuccessStatusCode)
             {
-                var content = await response.Content.ReadAsStringAsync(cancelToken);
+                var content = await response.Content.ReadAsStringAsync(cancelToken)
+                    .ConfigureAwait(false);
 
                 this.log(
                     LogLevel.Error,
