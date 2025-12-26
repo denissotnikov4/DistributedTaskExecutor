@@ -1,4 +1,4 @@
-using TaskService.Logic.Services.Messaging;
+using TaskService.Core.RabbitMQ;
 
 namespace TaskService.Api.DI;
 
@@ -6,16 +6,16 @@ public class RabbitDiModule : IDiModule
 {
     public void RegisterIn(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddSingleton<ITaskMessageQueue>(
+        services.AddSingleton<IRabbitMessageQueue<Guid>>(
             serviceProvider =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<RabbitMqTaskMessageQueue>>();
+                var logger = serviceProvider.GetRequiredService<ILogger<IRabbitMessageQueue<Guid>>>();
+                var settings = serviceProvider.GetRequiredService<RabbitSettings>();
 
-                return new RabbitMqTaskMessageQueue(
-                    configuration["RabbitMQ:HostName"] ?? "localhost",
-                    configuration["RabbitMQ:UserName"] ?? "guest",
-                    configuration["RabbitMQ:Password"] ?? "guest",
-                    logger);
+                return new RabbitMessageQueue<Guid>(
+                    settings,
+                    infoMessage => logger.LogInformation(infoMessage),
+                    errorMessage => logger.LogError(errorMessage));
             });
     }
 }

@@ -9,9 +9,15 @@ public class TaskServiceClient : ITaskServiceClient
     private const string ApiPath = "api/tasks";
 
     private readonly HttpClient httpClient;
-    private readonly Action<LogLevel, string> log;
 
-    public TaskServiceClient(string baseUrl, string apiKey, Action<LogLevel, string> log)
+    private readonly Action<string> logInfo;
+    private readonly Action<string> logError;
+
+    public TaskServiceClient(
+        string baseUrl,
+        string apiKey,
+        Action<string> logInfo,
+        Action<string> logError)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
@@ -23,19 +29,18 @@ public class TaskServiceClient : ITaskServiceClient
             throw new ArgumentNullException(nameof(apiKey));
         }
 
-        ArgumentNullException.ThrowIfNull(log);
-
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
         this.httpClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
 
-        this.log = log;
+        this.logInfo = logInfo ?? throw new ArgumentNullException(nameof(logInfo));
+        this.logError = logError ?? throw new ArgumentNullException(nameof(logError));
     }
 
     public async Task<RequestResult<ClientTask>> GetTaskByIdAsync(Guid id, CancellationToken cancelToken = default)
     {
         try
         {
-            this.log(LogLevel.Info, $"Trying to GET Task by id \"{id}\".");
+            this.logInfo($"Trying to GET Task by id \"{id}\".");
 
             var response = await this.httpClient.GetAsync($"{ApiPath}/{id}", cancelToken)
                 .ConfigureAwait(false);
@@ -45,14 +50,12 @@ public class TaskServiceClient : ITaskServiceClient
                 var errorMessage = await response.Content.ReadAsStringAsync(cancelToken)
                     .ConfigureAwait(false);
 
-                this.log(
-                    LogLevel.Error,
-                    $"Can't get Task by id \"{id}\" due to error. StatusCode: {(int)response.StatusCode}, Message: {errorMessage}.");
+                this.logError($"Can't get Task by id \"{id}\" due to error. StatusCode: {(int)response.StatusCode}, Message: {errorMessage}.");
 
                 return RequestResult<ClientTask>.Failure((int)response.StatusCode, errorMessage);
             }
 
-            this.log(LogLevel.Info, $"Successfully GOT Task by id \"{id}\".");
+            this.logInfo($"Successfully GOT Task by id \"{id}\".");
 
             var result = await response.Content.ReadFromJsonAsync<ClientTask>(cancellationToken: cancelToken)
                 .ConfigureAwait(false);
@@ -63,7 +66,7 @@ public class TaskServiceClient : ITaskServiceClient
         {
             var errorMessage = $"Unexpected error occurred while GETTING Task by id \"{id}\": {exception.Message}.";
 
-            this.log(LogLevel.Error, errorMessage);
+            this.logError(errorMessage);
 
             return RequestResult<ClientTask>.Failure(500, errorMessage);
         }
@@ -76,7 +79,7 @@ public class TaskServiceClient : ITaskServiceClient
     {
         try
         {
-            this.log(LogLevel.Info, $"Trying to PATCH Task by id \"{id}\".");
+            this.logInfo($"Trying to PATCH Task by id \"{id}\".");
 
             var response = await this.httpClient.PatchAsJsonAsync($"{ApiPath}/{id}", updateRequest, cancelToken)
                 .ConfigureAwait(false);
@@ -86,14 +89,12 @@ public class TaskServiceClient : ITaskServiceClient
                 var content = await response.Content.ReadAsStringAsync(cancelToken)
                     .ConfigureAwait(false);
 
-                this.log(
-                    LogLevel.Error,
-                    $"Can't PATCH Task by id \"{id}\" due to error. StatusCode: {(int)response.StatusCode}, Message: {content}.");
+                this.logError($"Can't PATCH Task by id \"{id}\" due to error. StatusCode: {(int)response.StatusCode}, Message: {content}.");
 
                 return RequestResult.Failure((int)response.StatusCode, content);
             }
 
-            this.log(LogLevel.Info, $"Successfully PATCHED Task by id \"{id}\".");
+            this.logInfo($"Successfully PATCHED Task by id \"{id}\".");
 
             return RequestResult.Success((int)response.StatusCode);
         }
@@ -101,7 +102,7 @@ public class TaskServiceClient : ITaskServiceClient
         {
             var errorMessage = $"Unexpected error occurred while PATCHING Task by id \"{id}\": {exception.Message}.";
 
-            this.log(LogLevel.Error, errorMessage);
+            this.logError(errorMessage);
 
             return RequestResult.Failure(500, errorMessage);
         }

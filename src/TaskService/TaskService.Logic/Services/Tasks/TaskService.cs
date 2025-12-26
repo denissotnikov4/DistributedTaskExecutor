@@ -1,8 +1,8 @@
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
+using TaskService.Core.RabbitMQ;
 using TaskService.Dal.Repositories;
 using TaskService.Logic.Mappings;
-using TaskService.Logic.Services.Messaging;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
@@ -10,11 +10,9 @@ namespace TaskService.Logic.Services.Tasks;
 public class TaskService : ITaskService
 {
     private readonly ITaskRepository taskRepository;
-    private readonly ITaskMessageQueue messageQueue;
+    private readonly IRabbitMessageQueue<Guid> messageQueue;
 
-    public TaskService(
-        ITaskRepository taskRepository,
-        ITaskMessageQueue messageQueue)
+    public TaskService(IRabbitMessageQueue<Guid> messageQueue, ITaskRepository taskRepository)
     {
         this.taskRepository = taskRepository ?? throw new ArgumentNullException(nameof(taskRepository));
         this.messageQueue = messageQueue ?? throw new ArgumentNullException(nameof(messageQueue));
@@ -22,15 +20,9 @@ public class TaskService : ITaskService
 
     public async Task<Guid> CreateTaskAsync(TaskCreateRequest request, CancellationToken cancellationToken = default)
     {
-        var serverTask = request.ToServerModel();
-        var taskId = await this.taskRepository.CreateAsync(serverTask, cancellationToken);
+        var taskId = await this.taskRepository.CreateAsync(request.ToServerModel(), cancellationToken);
 
-        var createdTask = await this.taskRepository.GetByIdAsync(taskId, cancellationToken);
-        if (createdTask != null)
-        {
-            var clientTask = createdTask.ToClientModel();
-            await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
-        }
+        this.messageQueue.Publish(taskId);
 
         return taskId;
     }
@@ -70,7 +62,6 @@ public class TaskService : ITaskService
 
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
 
-        var clientTask = serverTask.ToClientModel();
-        await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
+        this.messageQueue.Publish(id);
     }
 }
