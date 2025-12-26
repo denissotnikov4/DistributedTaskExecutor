@@ -1,3 +1,5 @@
+using Core.DI;
+
 namespace TaskService.Api.DI;
 
 public class MainDiModule : IDiModule

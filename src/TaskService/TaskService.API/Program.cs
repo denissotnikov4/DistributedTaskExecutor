@@ -1,5 +1,4 @@
 using System.Text;
-using ApiKeys.Client;
 using ApiKeys.Client.Extensions;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -36,11 +35,6 @@ var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyThatShouldBe
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "TaskService";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "TaskService";
 
-var apiKeysServiceUrl = builder.Configuration["ApiKeysService:BaseUrl"]!;
-
-builder.Services.AddApiKeysClient(apiKeysServiceUrl);
-builder.Services.AddApiKeyAuthentication();
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
@@ -56,8 +50,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     })
     .AddApiKey();
-
-builder.Services.AddAuthorization();
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
 
