@@ -1,5 +1,6 @@
 using ApiKeys.Client;
 using Core.Results;
+using Microsoft.Extensions.Logging;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 
@@ -10,15 +11,12 @@ public class TaskServiceClient : ITaskServiceClient
     private const string ApiPath = "api/tasks";
 
     private readonly HttpClient httpClient;
-
-    private readonly Action<string> logInfo;
-    private readonly Action<string> logError;
+    private readonly ILogger<TaskServiceClient> logger;
 
     public TaskServiceClient(
         string baseUrl,
         string apiKey,
-        Action<string> logInfo,
-        Action<string> logError)
+        ILogger<TaskServiceClient> logger)
     {
         if (string.IsNullOrWhiteSpace(baseUrl))
         {
@@ -27,25 +25,25 @@ public class TaskServiceClient : ITaskServiceClient
 
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
         this.httpClient.AddApiKey(apiKey);
-
-        this.logInfo = logInfo;
-        this.logError = logError;
+        this.logger = logger;
     }
 
     public async Task<ClientResult<ClientTask>> GetTaskByIdAsync(Guid id, CancellationToken cancelToken = default)
     {
-        this.logInfo($"Trying to GET Task by id \"{id}\".");
+        this.logger.LogInformation("Trying to GET Task by id {TaskId}", id);
 
-        var result = await this.httpClient.GetAsResultAsync<ClientTask>($"{ApiPath}/{id}", cancelToken)
-            .ConfigureAwait(false);
+        var result = await this.httpClient.GetAsResultAsync<ClientTask>($"{ApiPath}/{id}", cancelToken);
 
         if (result.IsSuccess)
         {
-            this.logInfo($"Successfully GOT Task by id \"{id}\".");
+            this.logger.LogInformation("Successfully GOT Task by id {TaskId}", id);
         }
         else
         {
-            this.logError($"Can't get Task by id \"{id}\" due to error. Error: {result.Error.Message}.");
+            this.logger.LogError(
+                "Can't get Task by id {TaskId} due to error. Error: {ErrorMessage}",
+                id,
+                result.Error.Message);
         }
 
         return result;
@@ -56,18 +54,20 @@ public class TaskServiceClient : ITaskServiceClient
         TaskUpdateRequest updateRequest,
         CancellationToken cancelToken = default)
     {
-        this.logInfo($"Trying to PATCH Task by id \"{id}\".");
+        this.logger.LogInformation("Trying to PATCH Task by id {TaskId}", id);
 
-        var result = await this.httpClient.PatchAsResultAsync($"{ApiPath}/{id}", updateRequest, cancelToken)
-            .ConfigureAwait(false);
+        var result = await this.httpClient.PatchAsResultAsync($"{ApiPath}/{id}", updateRequest, cancelToken);
 
         if (result.IsSuccess)
         {
-            this.logInfo($"Successfully PATCHED Task by id \"{id}\".");
+            this.logger.LogInformation("Successfully PATCHED Task by id {TaskId}", id);
         }
         else
         {
-            this.logError($"Can't PATCH Task by id \"{id}\" due to error. Error: {result.Error.Message}.");
+            this.logger.LogError(
+                "Can't PATCH Task by id {TaskId} due to error. Error: {ErrorMessage}",
+                id,
+                result.Error.Message);
         }
 
         return result;
