@@ -1,5 +1,5 @@
-using TaskService.Client.Models.Requests;
 using TaskService.Client.Models.Tasks;
+using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Dal.Repositories;
 using TaskService.Logic.Mappings;
 using TaskService.Logic.Services.Messaging;
@@ -22,9 +22,15 @@ public class TaskService : ITaskService
 
     public async Task<Guid> CreateTaskAsync(TaskCreateRequest request, CancellationToken cancellationToken = default)
     {
-        var taskId = await this.taskRepository.CreateAsync(request.ToServerModel(), cancellationToken);
+        var serverTask = request.ToServerModel();
+        var taskId = await this.taskRepository.CreateAsync(serverTask, cancellationToken);
 
-        await this.messageQueue.PublishTaskAsync(taskId, cancellationToken);
+        var createdTask = await this.taskRepository.GetByIdAsync(taskId, cancellationToken);
+        if (createdTask != null)
+        {
+            var clientTask = createdTask.ToClientModel();
+            await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
+        }
 
         return taskId;
     }
@@ -64,6 +70,7 @@ public class TaskService : ITaskService
 
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
 
-        await this.messageQueue.PublishTaskAsync(serverTask.Id, cancellationToken);
+        var clientTask = serverTask.ToClientModel();
+        await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
     }
 }

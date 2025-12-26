@@ -1,5 +1,9 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using TaskService.Dal.Data;
+using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
 
@@ -43,8 +47,7 @@ public class TaskExpirationService : BackgroundService
         
         var now = DateTime.UtcNow;
         var expiredTasks = await dbContext.Tasks
-            .Where(t => t.St.ExpiresAt.HasValue &&
-                        t.ExpiresAt.Value < now &&
+            .Where(t => t.CreatedAt + t.Ttl < now &&
                         (t.Status == TaskStatus.Pending || t.Status == TaskStatus.InProgress))
             .ToListAsync(cancellationToken);
         

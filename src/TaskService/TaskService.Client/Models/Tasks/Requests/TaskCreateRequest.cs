@@ -1,7 +1,6 @@
 using System.ComponentModel.DataAnnotations;
-using TaskService.Client.Models.Tasks;
 
-namespace TaskService.Client.Models.Requests;
+namespace TaskService.Client.Models.Tasks.Requests;
 
 public class TaskCreateRequest
 {
@@ -16,5 +15,6 @@ public class TaskCreateRequest
 
     public string? InputData { get; set; }
 
-    public TimeSpan Ttl { get; set; } = TimeSpan.FromMinutes(1);
+    [Required]
+    public TimeSpan? Ttl { get; set; }
 }

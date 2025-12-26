@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
-using TaskService.Client.Models.Requests;
 using TaskService.Client.Models.Tasks;
+using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Logic.Services.Tasks;
 
 namespace TaskService.Api.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/tasks")]
 public class TasksController : ControllerBase
 {
     private readonly ITaskService taskService;
@@ -24,7 +24,9 @@ public class TasksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     public async Task<ActionResult> CreateTaskAsync([FromBody] TaskCreateRequest request)
     {
-        return this.CreatedAtAction("GetTaskById", new { id = Guid.NewGuid() });
+        var createdId = await this.taskService.CreateTaskAsync(request);
+
+        return this.CreatedAtAction("GetTaskById", new { id = createdId });
     }
 
     /// <summary>
@@ -38,6 +40,17 @@ public class TasksController : ControllerBase
         var foundTask = await this.taskService.GetTaskByIdAsync(id);
 
         return foundTask == null ? this.NotFound() : this.Ok(foundTask);
+    }
+
+    /// <summary>
+    /// Обновить задачу по ID.
+    /// </summary>
+    [HttpPatch("{id}")]
+    [ProducesResponseType(typeof(ClientTask), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> UpdateTaskAsync(Guid id, TaskUpdateRequest updateRequest)
+    {
+        return this.Ok();
     }
 
     /// <summary>
