@@ -25,7 +25,7 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 
         return result.ToActionResult(
             this,
-            response => CreatedAtAction(nameof(CreateApiKey), new { id = response.Id }, response)
+            response => this.CreatedAtAction(nameof(this.CreateApiKey), new { id = response.Id }, response)
         );
     }
 

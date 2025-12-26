@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using static ApiKeys.Client.Auth.ApiKeyAuthConstants;
 
 namespace ApiKeys.Client.Auth;
 
@@ -7,24 +8,24 @@ public class ApiKeyRequiredAttribute : AuthorizeAttribute
 {
     public ApiKeyRequiredAttribute()
     {
-        AuthenticationSchemes = ApiKeyAuthConstants.SchemeName;
+        this.AuthenticationSchemes = SchemeName;
     }
 
     public string[]? RequiredClaims
     {
         get
         {
-            if (string.IsNullOrEmpty(Policy))
+            if (string.IsNullOrEmpty(this.Policy))
             {
                 return null;
             }
 
-            if (!Policy.StartsWith(ApiKeyAuthConstants.PolicyPrefix, StringComparison.Ordinal))
+            if (!this.Policy.StartsWith(PolicyPrefix, StringComparison.Ordinal))
             {
                 return null;
             }
 
-            var claimsString = Policy[ApiKeyAuthConstants.PolicyPrefix.Length..];
+            var claimsString = this.Policy[PolicyPrefix.Length..];
             return string.IsNullOrEmpty(claimsString)
                 ? null
                 : claimsString.Split('|', StringSplitOptions.RemoveEmptyEntries);
@@ -33,12 +34,12 @@ public class ApiKeyRequiredAttribute : AuthorizeAttribute
         {
             if (value is null || value.Length == 0)
             {
-                Policy = null;
+                this.Policy = null;
             }
             else
             {
                 var claimsString = string.Join("|", value);
-                Policy = ApiKeyAuthConstants.PolicyPrefix + claimsString;
+                this.Policy = PolicyPrefix + claimsString;
             }
         }
     }

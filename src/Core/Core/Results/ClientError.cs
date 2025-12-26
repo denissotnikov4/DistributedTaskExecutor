@@ -20,9 +20,9 @@ public class ClientError : Error
         string? details = null)
         : base(message)
     {
-        StatusCode = statusCode;
-        RequestUri = requestUri;
-        Details = details;
+        this.StatusCode = statusCode;
+        this.RequestUri = requestUri;
+        this.Details = details;
     }
 
     public static ClientError FromStatusCode(

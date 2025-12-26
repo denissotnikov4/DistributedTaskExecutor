@@ -17,11 +17,11 @@ public class ApiKeyAuthenticationHandler(
 {
     protected override async Task<AuthenticateResult> HandleAuthenticateAsync()
     {
-        var apiKey = GetApiKeyFromRequest();
+        var apiKey = this.GetApiKeyFromRequest();
 
         if (string.IsNullOrWhiteSpace(apiKey))
         {
-            Logger.LogWarning("API key not found in request");
+            this.Logger.LogWarning("API key not found in request");
             return AuthenticateResult.Fail("API key is required");
         }
 
@@ -31,14 +31,14 @@ public class ApiKeyAuthenticationHandler(
         {
             if (validationResult.Error is ClientError clientError)
             {
-                Logger.LogWarning(
+                this.Logger.LogWarning(
                     "API key validation failed: {StatusCode} - {Message}",
                     clientError.StatusCode,
                     clientError.Message);
             }
             else
             {
-                Logger.LogWarning("API key validation failed: {Message}", validationResult.Error.Message);
+                this.Logger.LogWarning("API key validation failed: {Message}", validationResult.Error.Message);
             }
 
             return AuthenticateResult.Fail(validationResult.Error.Message);
@@ -48,40 +48,39 @@ public class ApiKeyAuthenticationHandler(
 
         if (result.ApiKeyId is null)
         {
-            Logger.LogWarning("API key validation failed: invalid key");
+            this.Logger.LogWarning("API key validation failed: invalid key");
             return AuthenticateResult.Fail("Invalid API key");
         }
 
         var claims = new List<Claim>
         {
-            new(Options.ApiKeyIdClaimType, result.ApiKeyId.Value.ToString())
+            new(this.Options.ApiKeyIdClaimType, result.ApiKeyId.Value.ToString())
         };
 
         if (result.Claims is { Count: > 0 })
         {
             foreach (var claim in result.Claims)
             {
-                claims.Add(new Claim(Options.ApiKeyClaimType, claim));
+                claims.Add(new Claim(this.Options.ApiKeyClaimType, claim));
             }
         }
 
-        var identity = new ClaimsIdentity(claims, Options.SchemeName);
+        var identity = new ClaimsIdentity(claims, this.Options.SchemeName);
         var principal = new ClaimsPrincipal(identity);
-        var ticket = new AuthenticationTicket(principal, Options.SchemeName);
+        var ticket = new AuthenticationTicket(principal, this.Options.SchemeName);
 
-        Logger.LogInformation("API key authenticated successfully: {ApiKeyId}", result.ApiKeyId);
+        this.Logger.LogInformation("API key authenticated successfully: {ApiKeyId}", result.ApiKeyId);
         return AuthenticateResult.Success(ticket);
     }
 
     private string? GetApiKeyFromRequest()
     {
-        if (Request.Headers.TryGetValue(Options.HeaderName, out var headerValue))
+        if (this.Request.Headers.TryGetValue(this.Options.HeaderName, out var headerValue))
         {
             return headerValue.ToString();
         }
 
-        if (!string.IsNullOrEmpty(Options.QueryParameterName) &&
-            Request.Query.TryGetValue(Options.QueryParameterName, out var queryValue))
+        if (!string.IsNullOrEmpty(this.Options.QueryParameterName) && this.Request.Query.TryGetValue(this.Options.QueryParameterName, out var queryValue))
         {
             return queryValue.ToString();
         }

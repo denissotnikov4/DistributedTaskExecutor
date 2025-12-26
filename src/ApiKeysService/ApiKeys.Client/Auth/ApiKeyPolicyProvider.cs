@@ -22,9 +22,9 @@ public class ApiKeyPolicyProvider(
                 var requiredClaims = claimsString.Split('|', StringSplitOptions.RemoveEmptyEntries);
                 if (requiredClaims.Length > 0)
                 {
-                    var claimType = options.ApiKeyClaimType;
+                    var claimType = this.options.ApiKeyClaimType;
 
-                    var policy = new AuthorizationPolicyBuilder(options.SchemeName)
+                    var policy = new AuthorizationPolicyBuilder(this.options.SchemeName)
                         .AddRequirements(new ApiKeyClaimsRequirement(requiredClaims, claimType))
                         .Build();
 
@@ -33,16 +33,16 @@ public class ApiKeyPolicyProvider(
             }
         }
 
-        return fallbackPolicyProvider.GetPolicyAsync(policyName);
+        return this.fallbackPolicyProvider.GetPolicyAsync(policyName);
     }
 
     public Task<AuthorizationPolicy> GetDefaultPolicyAsync()
     {
-        return fallbackPolicyProvider.GetDefaultPolicyAsync();
+        return this.fallbackPolicyProvider.GetDefaultPolicyAsync();
     }
 
     public Task<AuthorizationPolicy?> GetFallbackPolicyAsync()
     {
-        return fallbackPolicyProvider.GetFallbackPolicyAsync();
+        return this.fallbackPolicyProvider.GetFallbackPolicyAsync();
     }
 }

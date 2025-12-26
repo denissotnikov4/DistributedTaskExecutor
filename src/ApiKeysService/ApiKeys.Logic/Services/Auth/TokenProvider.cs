@@ -19,8 +19,8 @@ public class JwtTokenProvider(IOptions<JwtOptions> options) : ITokenProvider
     public string GenerateToken(string username, IEnumerable<string> additionalClaims)
     {
         var claims = CreateClaims(username, additionalClaims);
-        var signingCredentials = CreateSigningCredentials();
-        var token = CreateJwtToken(claims, signingCredentials);
+        var signingCredentials = this.CreateSigningCredentials();
+        var token = this.CreateJwtToken(claims, signingCredentials);
 
         var jwtTokenHandler = new JwtSecurityTokenHandler();
         return jwtTokenHandler.WriteToken(token);
@@ -31,10 +31,10 @@ public class JwtTokenProvider(IOptions<JwtOptions> options) : ITokenProvider
         SigningCredentials signingCredentials)
     {
         return new JwtSecurityToken(
-            options.Issuer,
-            options.Audience,
+            this.options.Issuer, 
+            this.options.Audience,
             claims,
-            expires: DateTime.UtcNow.AddMinutes(options.ExpiryMinutes),
+            expires: DateTime.UtcNow.AddMinutes(this.options.ExpiryMinutes),
             signingCredentials: signingCredentials);
     }
 
@@ -42,7 +42,7 @@ public class JwtTokenProvider(IOptions<JwtOptions> options) : ITokenProvider
     {
         return new SigningCredentials(
             new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(options.Secret)),
+                Encoding.UTF8.GetBytes(this.options.Secret)),
             SecurityAlgorithms.HmacSha256);
     }
 
