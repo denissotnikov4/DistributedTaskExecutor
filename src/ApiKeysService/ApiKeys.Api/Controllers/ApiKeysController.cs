@@ -1,5 +1,5 @@
 using System.ComponentModel.DataAnnotations;
-using ApiKeys.Api.Configuration;
+using ApiKeys.Api.Constants;
 using ApiKeys.Client.Models;
 using ApiKeys.Logic.Services.ApiKeys;
 using Core.Results;

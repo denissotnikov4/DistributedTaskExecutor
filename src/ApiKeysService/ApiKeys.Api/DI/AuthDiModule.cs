@@ -1,4 +1,4 @@
-using ApiKeys.Api.Configuration;
+using ApiKeys.Api.Constants;
 using Core.Auth;
 using Core.DI;
 
@@ -12,7 +12,7 @@ public class AuthDiModule : IDiModule
         services.AddAuthorization(options =>
         {
             options.AddPolicy(AuthPolicies.ManageApiKey, policy => 
-                policy.RequireClaim("claim", Claims.ManageApiKey));
+                policy.RequireClaim("claim", JwtClaims.ManageApiKey));
         });
     }
 }
