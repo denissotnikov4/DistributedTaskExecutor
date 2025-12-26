@@ -1,3 +1,4 @@
+using Core.DI;
 using TaskService.Logic.Validators;
 
 namespace TaskService.Api.DI;

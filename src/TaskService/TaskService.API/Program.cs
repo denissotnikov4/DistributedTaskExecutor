@@ -1,7 +1,5 @@
-using System.Text;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+using ApiKeys.Client.Extensions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
 using TaskService.Api.DI;
@@ -28,28 +26,8 @@ builder.Services.AddSwaggerGen(configure =>
         Version = "v1",
         Description = "API для управления распределенными задачами с TTL"
     });
+    configure.AddApiKeySecurity();
 });
-
-var jwtKey = builder.Configuration["Jwt:Key"] ?? "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong!";
-var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "TaskService";
-var jwtAudience = builder.Configuration["Jwt:Audience"] ?? "TaskService";
-
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidateAudience = true,
-            ValidateLifetime = true,
-            ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtIssuer,
-            ValidAudience = jwtAudience,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
-        };
-    });
-
-builder.Services.AddAuthorization();
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
 

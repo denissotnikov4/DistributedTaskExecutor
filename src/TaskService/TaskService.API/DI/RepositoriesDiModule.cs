@@ -1,3 +1,4 @@
+using Core.DI;
 using Microsoft.EntityFrameworkCore;
 using TaskService.Dal.Data;
 using TaskService.Dal.Repositories;

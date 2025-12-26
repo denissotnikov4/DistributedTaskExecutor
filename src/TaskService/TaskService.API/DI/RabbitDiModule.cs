@@ -1,3 +1,4 @@
+using Core.DI;
 using TaskService.Core.RabbitMQ;
 
 namespace TaskService.Api.DI;

@@ -206,6 +206,40 @@ public static class HttpClientExtensions
         }
     }
 
+    public static async Task<ClientResult> PatchAsResultAsync<TRequest>(
+        this HttpClient client,
+        string? requestUri,
+        TRequest value,
+        CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            var response = await client.PatchAsJsonAsync(requestUri, value, cancellationToken);
+            return await HandleResponseAsync(response, cancellationToken);
+        }
+        catch (HttpRequestException ex)
+        {
+            return ClientError.NetworkError(
+                $"Network error: {ex.Message}",
+                requestUri != null ? new Uri(requestUri, UriKind.RelativeOrAbsolute) : null,
+                ex);
+        }
+        catch (TaskCanceledException ex) when (ex.InnerException is TimeoutException)
+        {
+            return ClientError.NetworkError(
+                "Request timeout",
+                requestUri != null ? new Uri(requestUri, UriKind.RelativeOrAbsolute) : null,
+                ex);
+        }
+        catch (Exception ex)
+        {
+            return ClientError.NetworkError(
+                $"Unexpected error: {ex.Message}",
+                requestUri != null ? new Uri(requestUri, UriKind.RelativeOrAbsolute) : null,
+                ex);
+        }
+    }
+
     private static async Task<ClientResult<T>> HandleResponseAsync<T>(
         HttpResponseMessage response,
         CancellationToken cancellationToken)
