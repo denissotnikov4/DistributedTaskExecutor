@@ -8,6 +8,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\..\Core\Core\Core.csproj" />
+      <ProjectReference Include="..\..\ApiKeysService\ApiKeys.Client\ApiKeys.Client.csproj" />
     </ItemGroup>
 
 </Project>

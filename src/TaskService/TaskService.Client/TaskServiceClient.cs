@@ -1,3 +1,4 @@
+using ApiKeys.Client;
 using Core.Results;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
@@ -24,16 +25,11 @@ public class TaskServiceClient : ITaskServiceClient
             throw new ArgumentNullException(nameof(baseUrl));
         }
 
-        if (string.IsNullOrWhiteSpace(apiKey))
-        {
-            throw new ArgumentNullException(nameof(apiKey));
-        }
-
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        this.httpClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
+        this.httpClient.AddApiKey(apiKey);
 
-        this.logInfo = logInfo ?? throw new ArgumentNullException(nameof(logInfo));
-        this.logError = logError ?? throw new ArgumentNullException(nameof(logError));
+        this.logInfo = logInfo;
+        this.logError = logError;
     }
 
     public async Task<ClientResult<ClientTask>> GetTaskByIdAsync(Guid id, CancellationToken cancelToken = default)
