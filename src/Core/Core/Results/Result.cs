@@ -9,10 +9,10 @@ public class Result<T>
     {
         get
         {
-            if (IsFailure)
+            if (this.IsFailure)
                 throw new InvalidOperationException(
                     "Cannot access Value when result is a failure. Check IsFailure first.");
-            return value!;
+            return this.value!;
         }
     }
 
@@ -20,26 +20,26 @@ public class Result<T>
     {
         get
         {
-            if (!IsFailure)
+            if (!this.IsFailure)
                 throw new InvalidOperationException(
                     "Cannot access Error when result is a success. Check IsFailure first.");
-            return error!;
+            return this.error!;
         }
     }
 
-    public bool IsFailure => error != null;
-    public bool IsSuccess => !IsFailure;
+    public bool IsFailure => this.error != null;
+    public bool IsSuccess => !this.IsFailure;
 
     protected Result(T value)
     {
         this.value = value;
-        error = null;
+        this.error = null;
     }
 
     protected Result(Error error)
     {
         this.error = error;
-        value = default;
+        this.value = default;
     }
 
     public static Result<T> Success(T value) => new(value);
@@ -63,19 +63,19 @@ public class Result
     {
         get
         {
-            if (!IsFailure)
+            if (!this.IsFailure)
                 throw new InvalidOperationException(
                     "Cannot access Error when result is a success. Check IsFailure first.");
-            return error!;
+            return this.error!;
         }
     }
 
-    public bool IsFailure => error != null;
-    public bool IsSuccess => !IsFailure;
+    public bool IsFailure => this.error != null;
+    public bool IsSuccess => !this.IsFailure;
 
     protected Result()
     {
-        error = null;
+        this.error = null;
     }
 
     protected Result(Error error)
