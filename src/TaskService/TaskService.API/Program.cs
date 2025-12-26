@@ -1,3 +1,4 @@
+using ApiKeys.Client.Extensions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -25,6 +26,7 @@ builder.Services.AddSwaggerGen(configure =>
         Version = "v1",
         Description = "API для управления распределенными задачами с TTL"
     });
+    configure.AddApiKeySecurity();
 });
 
 new MainDiModule().RegisterIn(builder.Services, builder.Configuration);
