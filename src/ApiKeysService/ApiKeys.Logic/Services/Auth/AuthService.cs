@@ -21,22 +21,22 @@ public class AuthService(
     private readonly AdminUserOption adminUserOptions = adminUserOptions.Value;
 
     // note: пока так, для демонстрации пойдет
-    public async Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
+    public Task<Result<LoginResponse>> LoginAsync(LoginRequest request)
     {
-        var adminUsername = adminUserOptions.Username;
-        var adminPassword = adminUserOptions.Password;
+        var adminUsername = this.adminUserOptions.Username;
+        var adminPassword = this.adminUserOptions.Password;
         
         if (!adminUsername.Equals(request.Username, StringComparison.OrdinalIgnoreCase)
             || adminPassword != request.Password)
         {
             logger.LogWarning("Failed login attempt for username: {Username}", request.Username);
-            return ServiceError.Unauthorized("Invalid username or password");
+            return Task.FromResult<Result<LoginResponse>>(ServiceError.Unauthorized("Invalid username or password"));
         }
 
-        var token = tokenProvider.GenerateToken(request.Username, adminUserOptions.Claims);
+        var token = tokenProvider.GenerateToken(request.Username, this.adminUserOptions.Claims);
 
         logger.LogInformation("User {Username} logged in successfully", request.Username);
 
-        return new LoginResponse(token);
+        return Task.FromResult<Result<LoginResponse>>(new LoginResponse(token));
     }
 }

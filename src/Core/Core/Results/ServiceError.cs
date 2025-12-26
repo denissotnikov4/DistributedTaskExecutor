@@ -8,7 +8,7 @@ public class ServiceError : Error
 
     protected ServiceError(string message, HttpStatusCode httpStatus) : base(message)
     {
-        HttpStatus = httpStatus;
+        this.HttpStatus = httpStatus;
     }
 
     public static ServiceError NotFound(string message = "") => new(message, HttpStatusCode.NotFound);

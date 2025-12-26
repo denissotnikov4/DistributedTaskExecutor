@@ -14,7 +14,7 @@ public class ApiKeysUnitOfWork : UnitOfWork, IApiKeysUnitOfWork
         IApiKeysRepository apiKeysRepository,
         ApiKeyDbContext dbContext) : base(dbContext)
     {
-        ApiKeys = apiKeysRepository;
+        this.ApiKeys = apiKeysRepository;
     }
 
     public IApiKeysRepository ApiKeys { get; }

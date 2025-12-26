@@ -45,7 +45,7 @@ public class ApiKeysRepository(ApiKeyDbContext context) : IApiKeysRepository
 
     public async Task DeleteAsync(Guid id)
     {
-        var apiKey = await GetByIdAsync(id);
+        var apiKey = await this.GetByIdAsync(id);
         if (apiKey != null)
         {
             context.ApiKeys.Remove(apiKey);

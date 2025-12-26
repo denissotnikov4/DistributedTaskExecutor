@@ -14,7 +14,7 @@ public class TestApiKeysAuthController : ControllerBase
     [HttpGet("public")]
     public IActionResult GetPublic()
     {
-        return NoContent();
+        return this.NoContent();
     }
 
     /// <summary>
@@ -24,10 +24,10 @@ public class TestApiKeysAuthController : ControllerBase
     [ApiKeyRequired]
     public IActionResult GetProtected()
     {
-        var apiKeyId = User.GetApiKeyId();
-        var claims = User.GetApiKeyClaims();
+        var apiKeyId = this.User.GetApiKeyId();
+        var claims = this.User.GetApiKeyClaims();
 
-        return Ok(new
+        return this.Ok(new
         {
             apiKeyId, 
             claims
@@ -41,10 +41,10 @@ public class TestApiKeysAuthController : ControllerBase
     [ApiKeyRequired(RequiredClaims = ["secure-claim"])]
     public IActionResult GetAdmin()
     {
-        var apiKeyId = User.GetApiKeyId();
-        var claims = User.GetApiKeyClaims();
+        var apiKeyId = this.User.GetApiKeyId();
+        var claims = this.User.GetApiKeyClaims();
 
-        return Ok(new
+        return this.Ok(new
         {
             apiKeyId,
             claims
@@ -58,10 +58,10 @@ public class TestApiKeysAuthController : ControllerBase
     [ApiKeyRequired(RequiredClaims = new[] { "read", "write", "admin" })]
     public IActionResult GetReadWrite()
     {
-        var apiKeyId = User.GetApiKeyId();
-        var claims = User.GetApiKeyClaims();
+        var apiKeyId = this.User.GetApiKeyId();
+        var claims = this.User.GetApiKeyClaims();
 
-        return Ok(new
+        return this.Ok(new
         {
             apiKeyId,
             claims
@@ -75,15 +75,15 @@ public class TestApiKeysAuthController : ControllerBase
     [ApiKeyRequired]
     public IActionResult GetCustomCheck()
     {
-        var apiKeyId = User.GetApiKeyId();
-        var claims = User.GetApiKeyClaims().ToHashSet();
+        var apiKeyId = this.User.GetApiKeyId();
+        var claims = this.User.GetApiKeyClaims().ToHashSet();
 
         if (!claims.Contains("some-claim"))
         {
-            return Forbid();
+            return this.Forbid();
         }
 
-        return Ok(new
+        return this.Ok(new
         {
             apiKeyId,
             claims

@@ -13,33 +13,33 @@ public abstract class UnitOfWork(DbContext dbContext) : IUnitOfWork
 
     protected virtual void Dispose(bool disposing)
     {
-        if (!disposed)
+        if (!this.disposed)
         {
             if (disposing)
             {
                 dbContext.Dispose();
             }
 
-            disposed = true;
+            this.disposed = true;
         }
     }
 
     public void Dispose()
     {
-        Dispose(disposing: true);
+        this.Dispose(disposing: true);
         GC.SuppressFinalize(this);
     }
 
     protected virtual ValueTask DisposeAsync(bool disposing)
     {
-        if (!disposed)
+        if (!this.disposed)
         {
             if (disposing)
             {
                 dbContext.DisposeAsync().AsTask().Wait();
             }
 
-            disposed = true;
+            this.disposed = true;
         }
 
         return ValueTask.CompletedTask;
@@ -47,7 +47,7 @@ public abstract class UnitOfWork(DbContext dbContext) : IUnitOfWork
 
     public async ValueTask DisposeAsync()
     {
-        await DisposeAsync(disposing: true).ConfigureAwait(false);
+        await this.DisposeAsync(disposing: true).ConfigureAwait(false);
         GC.SuppressFinalize(this);
     }
 }

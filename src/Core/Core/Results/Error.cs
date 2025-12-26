@@ -6,7 +6,7 @@ public class Error
 
     protected Error(string message)
     {
-        Message = message;
+        this.Message = message;
     }
 
     public static Error Failure(string message = "") => new(message);

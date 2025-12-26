@@ -15,7 +15,7 @@ public class ClientResult<T> : Result<T>
 
     public new static ClientResult<T> Success(T value) => new(value);
 
-    public new static ClientResult<T> Failure(Error error) => new(error);
+    public static ClientResult<T> Failure(Error error) => new(error);
 
     public static ClientResult<T> Failure(ClientError error) => new(error);
 
@@ -50,7 +50,7 @@ public class ClientResult : Result
 
     public new static ClientResult Success => new();
 
-    public new static ClientResult Failure(Error error) => new(error);
+    public static ClientResult Failure(Error error) => new(error);
 
     public static ClientResult Failure(ClientError error) => new(error);
 
