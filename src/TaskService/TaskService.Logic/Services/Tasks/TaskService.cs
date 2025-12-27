@@ -7,7 +7,7 @@ using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
 
-public class TaskService : ITaskService
+internal class TaskService : ITaskService
 {
     private readonly ITaskRepository taskRepository;
     private readonly IRabbitMessageQueue<Guid> messageQueue;
@@ -58,7 +58,7 @@ public class TaskService : ITaskService
         serverTask.StartedAt = null;
         serverTask.CompletedAt = null;
         serverTask.ErrorMessage = null;
-        serverTask.RetryCount++;
+        serverTask.RetryCount += 1;
 
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
 

@@ -1,6 +1,7 @@
 using ApiKeys.Client.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TaskService.API.Constants;
+using TaskService.Api.DTO.Responses;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Logic.Services.Tasks;
@@ -24,20 +25,20 @@ public class TasksController : ControllerBase
     /// </summary>
     [HttpPost]
     [ApiKeyRequired(RequiredClaims = [ApiKeyClaims.TasksWrite])]
-    [ProducesResponseType(typeof(ClientTask), StatusCodes.Status201Created)]
+    [ProducesResponseType(typeof(TaskCreateResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> CreateTaskAsync([FromBody] TaskCreateRequest request)
     {
-        var createdId = await this.taskService.CreateTaskAsync(request);
+        var taskId = await this.taskService.CreateTaskAsync(request);
 
-        return this.CreatedAtAction("GetTaskById", new { id = createdId });
+        return this.Ok(new TaskCreateResponse { Id = taskId });
     }
 
     /// <summary>
     /// Получить задачу по ID.
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:guid}")]
     [ApiKeyRequired(RequiredClaims = [ApiKeyClaims.TasksRead])]
     [ProducesResponseType(typeof(ClientTask), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

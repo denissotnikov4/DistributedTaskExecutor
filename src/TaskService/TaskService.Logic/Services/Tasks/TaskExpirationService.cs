@@ -1,8 +1,7 @@
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using TaskService.Dal.Data;
+using TaskService.Dal.Repositories;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
@@ -43,13 +42,9 @@ public class TaskExpirationService : BackgroundService
     private async Task CheckAndExpireTasksAsync(CancellationToken cancellationToken)
     {
         using var scope = this.serviceProvider.CreateScope();
-        var dbContext = scope.ServiceProvider.GetRequiredService<TaskDbContext>();
-        
-        var now = DateTime.UtcNow;
-        var expiredTasks = await dbContext.Tasks
-            .Where(t => t.CreatedAt + t.Ttl < now &&
-                        (t.Status == TaskStatus.Pending || t.Status == TaskStatus.InProgress))
-            .ToListAsync(cancellationToken);
+        var taskRepository = scope.ServiceProvider.GetRequiredService<ITaskRepository>();
+
+        var expiredTasks = await taskRepository.GetExpiredTaskAsync(cancellationToken);
         
         foreach (var task in expiredTasks)
         {
@@ -59,12 +54,11 @@ public class TaskExpirationService : BackgroundService
             task.CompletedAt = DateTime.UtcNow;
             task.ErrorMessage = "Task expired due to TTL";
         
-            dbContext.Tasks.Update(task);
+            await taskRepository.UpdateAsync(task, cancellationToken);
         }
         
         if (expiredTasks.Count != 0)
         {
-            await dbContext.SaveChangesAsync(cancellationToken);
             this.logger.LogInformation("Marked {Count} tasks as expired.", expiredTasks.Count);
         }
     }
