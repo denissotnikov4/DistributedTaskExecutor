@@ -186,8 +186,8 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         var response = await Client.PostAsync($"/api/tasks/{taskId}/retry", null);
         
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-        
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
         // Проверяем изменения в БД
         var dbTask = await TaskRepository.GetByIdAsync(taskId);
         dbTask.Should().NotBeNull();
@@ -225,7 +225,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         var response = await Client.PostAsync($"/api/tasks/{taskId}/retry", null);
         
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var dbTask = await TaskRepository.GetByIdAsync(taskId);
         dbTask.Should().NotBeNull();
@@ -254,7 +254,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         var response = await Client.PostAsync($"/api/tasks/{taskId}/retry", null);
         
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var dbTask = await TaskRepository.GetByIdAsync(taskId);
         dbTask.Should().NotBeNull();
@@ -381,7 +381,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
     }
 
     [Test]
-    public async Task RetryTaskAsync_MaxRetryCountTask_CanBeRetried()
+    public async Task RetryTaskAsync_IncreasesRetryCount_WhenCalled()
     {
         // Arrange
         var taskId = await CreateTestTaskInDbAsync(
@@ -396,7 +396,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         var response = await Client.PostAsync($"/api/tasks/{taskId}/retry", null);
         
         // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
         
         var dbTask = await TaskRepository.GetByIdAsync(taskId);
         dbTask.Should().NotBeNull();

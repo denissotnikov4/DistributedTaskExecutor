@@ -88,6 +88,6 @@ public class TasksController : ControllerBase
     {
         await this.taskService.RetryTaskAsync(id);
 
-        return this.NoContent();
+        return this.Ok();
     }
 }

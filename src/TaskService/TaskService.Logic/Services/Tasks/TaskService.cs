@@ -2,6 +2,7 @@ using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Core.RabbitMQ;
 using TaskService.Dal.Repositories;
+using TaskService.Logic.Exceptions;
 using TaskService.Logic.Mappings;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
@@ -45,12 +46,12 @@ internal class TaskService : ITaskService
 
         if (serverTask == null)
         {
-            throw new InvalidOperationException($"Task with id {id} not found.");
+            throw new TaskNotFoundException(id);
         }
 
         if (serverTask.Status is TaskStatus.Pending or TaskStatus.InProgress)
         {
-            throw new InvalidOperationException($"Task {id} cannot be retried due to current status: {serverTask.Status}.");
+            throw new TaskCannotBeRetriedException(id, serverTask.Status);
         }
 
         serverTask.Result = null;

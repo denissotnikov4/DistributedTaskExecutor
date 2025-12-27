@@ -16,7 +16,7 @@ internal class TaskRepository : ITaskRepository
 
     public async Task<ServerTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await this.context.Tasks.FindAsync([id], cancellationToken);
+        return await this.context.Tasks.AsNoTracking().FirstOrDefaultAsync(task => task.Id == id, cancellationToken);
     }
 
     public async Task<ICollection<ServerTask>> GetExpiredTaskAsync(CancellationToken cancellationToken = default)
@@ -29,7 +29,7 @@ internal class TaskRepository : ITaskRepository
 
     public async Task<ICollection<ServerTask>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await this.context.Tasks.ToListAsync(cancellationToken);
+        return await this.context.Tasks.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public async Task<Guid> CreateAsync(ServerTask serverTask, CancellationToken cancellationToken = default)

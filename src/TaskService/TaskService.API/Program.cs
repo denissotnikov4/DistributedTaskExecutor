@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi;
 using Serilog;
 using TaskService.Api.DI;
+using TaskService.Api.Middlewares;
 using TaskService.Dal.Data;
 
 namespace TaskService.Api;
@@ -58,6 +59,8 @@ public class Program
         app.UseAuthorization();
 
         app.MapControllers();
+
+        app.UseMiddleware<ExceptionHandler>();
 
         using (var scope = app.Services.CreateScope())
         {
