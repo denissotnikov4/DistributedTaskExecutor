@@ -1,10 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using TaskService.Dal.Data;
 using TaskService.Dal.Models;
+using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Dal.Repositories;
 
-public class TaskRepository : ITaskRepository
+internal class TaskRepository : ITaskRepository
 {
     private readonly TaskDbContext context;
 
@@ -15,12 +16,20 @@ public class TaskRepository : ITaskRepository
 
     public async Task<ServerTask?> GetByIdAsync(Guid id, CancellationToken cancellationToken = default)
     {
-        return await this.context.Tasks.FindAsync([id], cancellationToken);
+        return await this.context.Tasks.AsNoTracking().FirstOrDefaultAsync(task => task.Id == id, cancellationToken);
+    }
+
+    public async Task<ICollection<ServerTask>> GetExpiredTaskAsync(CancellationToken cancellationToken = default)
+    {
+        return await this.context.Tasks
+            .Where(t => t.CreatedAt + t.Ttl < DateTime.UtcNow &&
+                        (t.Status == TaskStatus.Pending || t.Status == TaskStatus.InProgress))
+            .ToListAsync(cancellationToken);
     }
 
     public async Task<ICollection<ServerTask>> GetAllAsync(CancellationToken cancellationToken = default)
     {
-        return await this.context.Tasks.ToListAsync(cancellationToken);
+        return await this.context.Tasks.AsNoTracking().ToListAsync(cancellationToken);
     }
 
     public async Task<Guid> CreateAsync(ServerTask serverTask, CancellationToken cancellationToken = default)

@@ -1,7 +1,9 @@
 using Core.DI;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using TaskService.Logic.Services.Tasks;
 
-namespace TaskService.Api.DI;
+namespace TaskService.Logic.DI;
 
 public class LogicDiModule : IDiModule
 {
