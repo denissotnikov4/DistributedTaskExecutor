@@ -11,7 +11,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="coverlet.collector" Version="6.0.4" />
+        <PackageReference Include="coverlet.collector" Version="6.0.0"/>
         <PackageReference Include="FluentAssertions" Version="8.8.0" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="8.0.22" />
         <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.22" />
@@ -32,9 +32,11 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\TaskService.Api\TaskService.Api.csproj" />
-      <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
-      <ProjectReference Include="..\TaskService.Logic\TaskService.Logic.csproj" />
+      <ProjectReference Include="..\ApiKeys.Api\ApiKeys.Api.csproj" />
+      <ProjectReference Include="..\ApiKeys.Dal\ApiKeys.Dal.csproj" />
+      <ProjectReference Include="..\ApiKeys.Logic\ApiKeys.Logic.csproj" />
+      <ProjectReference Include="..\ApiKeys.Client\ApiKeys.Client.csproj" />
     </ItemGroup>
 
 </Project>
+
