@@ -291,3 +291,5 @@ __pycache__/
 .env
 
 .idea/*
+*.sln.DotSettings
+*.sln.DotSettings.user
