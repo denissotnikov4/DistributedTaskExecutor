@@ -1,4 +1,4 @@
-namespace TaskService.Core.RabbitMQ;
+namespace DistributedTaskExecutor.Core.RabbitMQ;
 
 public class RabbitSettings
 {
