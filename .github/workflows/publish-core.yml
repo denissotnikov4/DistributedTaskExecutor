@@ -22,13 +22,13 @@ jobs:
           dotnet-version: 8.0.x
 
       - name: Restore
-        run: dotnet restore ./src/TaskService/TaskService.Core/TaskService.Core.csproj
+        run: dotnet restore ./src/Shared/DistributedTaskExecutor.Core/DistributedTaskExecutor.Core.csproj
 
       - name: Build
-        run: dotnet build ./src/TaskService/TaskService.Core/TaskService.Core.csproj --configuration Release --no-restore
+        run: dotnet build ./src/Shared/DistributedTaskExecutor.Core/DistributedTaskExecutor.Core.csproj --configuration Release --no-restore
 
       - name: Pack
-        run: dotnet pack ./src/TaskService/TaskService.Core/TaskService.Core.csproj --configuration Release --no-build -p:PackageVersion=${{ github.event.inputs.version }} -o out
+        run: dotnet pack ./src/Shared/DistributedTaskExecutor.Core/DistributedTaskExecutor.Core.csproj --configuration Release --no-build -p:PackageVersion=${{ github.event.inputs.version }} -o out
 
       - name: Push
         run: dotnet nuget push "out/*.nupkg" --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
