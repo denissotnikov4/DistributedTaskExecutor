@@ -1,6 +1,9 @@
-using TaskService.Core.RabbitMQ;
+using System.Text.Json;
+using DistributedTaskExecutor.Core.RabbitMQ;
+using Microsoft.Extensions.Logging;
+using Moq;
 
-namespace TaskService.Tests.RabbitMQ;
+namespace Shared.Tests.RabbitMQ;
 
 /// <summary>
 /// Требуется запущенный RabbitMQ на хосте.
@@ -45,9 +48,9 @@ public class RabbitMessageQueueTests
         var queueName = $"queue_{Guid.NewGuid()}";
         var exchangeName = $"{queueName}_exchange";
 
-        var settings = new RabbitSettings
+        var settings = new RabbitMqSettings
         {
-            AppName = "TaskService.Tests.Rabbit",
+            AppName = "Shared.Tests",
             HostName = "localhost",
             UserName = "guest",
             Password = "guest",
@@ -58,6 +61,9 @@ public class RabbitMessageQueueTests
             RoutingKey = "task-id"
         };
 
-        return new RabbitMessageQueue<TModel>(settings, _ => { }, _ => { });
+        return new RabbitMessageQueue<TModel>(
+            settings,
+            new JsonSerializerOptions(),
+            new Mock<ILogger<RabbitMessageQueue<TModel>>>().Object);
     }
 }

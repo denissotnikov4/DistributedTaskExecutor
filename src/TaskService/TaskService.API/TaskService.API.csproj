@@ -25,7 +25,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TaskService.Client\TaskService.Client.csproj" />
-    <ProjectReference Include="..\TaskService.Core\TaskService.Core.csproj" />
     <ProjectReference Include="..\TaskService.Logic\TaskService.Logic.csproj" />
     <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
     <ProjectReference Include="..\..\ApiKeysService\ApiKeys.Client\ApiKeys.Client.csproj" />

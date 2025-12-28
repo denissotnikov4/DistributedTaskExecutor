@@ -1,37 +1,30 @@
 using System.Text;
 using System.Text.Json;
+using Microsoft.Extensions.Logging;
 using RabbitMQ.Client;
 using RabbitMQ.Client.Events;
 
-namespace TaskService.Core.RabbitMQ;
+namespace DistributedTaskExecutor.Core.RabbitMQ;
 
 public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
 {
-    // ReSharper disable once StaticMemberInGenericType
-    private static readonly JsonSerializerOptions DefaultJsonOptions = new()
-    {
-        PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        WriteIndented = false
-    };
-
     private readonly IModel channel;
-
     private readonly IConnection connection;
-    private readonly Action<string> logError;
-    private readonly Action<string> logInfo;
 
-    private readonly RabbitSettings settings;
+    private readonly RabbitMqSettings settings;
+    private readonly JsonSerializerOptions messageSerializationOptions;
+    private readonly ILogger<RabbitMessageQueue<TMessage>> logger;
 
     private bool disposed;
 
     public RabbitMessageQueue(
-        RabbitSettings settings,
-        Action<string> logInfo,
-        Action<string> logError)
+        RabbitMqSettings mqSettings,
+        JsonSerializerOptions messageSerializationOptions,
+        ILogger<RabbitMessageQueue<TMessage>> logger)
     {
-        this.settings = settings ?? throw new ArgumentNullException(nameof(settings));
-        this.logInfo = logInfo ?? throw new ArgumentNullException(nameof(logInfo));
-        this.logError = logError ?? throw new ArgumentNullException(nameof(logError));
+        this.settings = mqSettings ?? throw new ArgumentNullException(nameof(mqSettings));
+        this.messageSerializationOptions = messageSerializationOptions ?? throw new ArgumentNullException(nameof(messageSerializationOptions));
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         try
         {
@@ -56,16 +49,17 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
 
             this.channel.QueueBind(this.settings.QueueName, this.settings.ExchangeName, this.settings.RoutingKey);
 
-            this.logInfo($"RabbitMQ connection established. Queue: {this.settings.QueueName}.");
+            this.logger.LogInformation("RabbitMQ connection established. Queue: {queueName}.", this.settings.QueueName);
         }
         catch (Exception exception)
         {
-            this.logError($"Failed to establish RabbitMQ connection, Reason: {exception.Message}.");
+            this.logger.LogError("Failed to establish RabbitMQ connection: {errorMessage}.", exception.Message);
+
             throw;
         }
     }
 
-    public void Publish(TMessage message, JsonSerializerOptions? jsonOptions = null)
+    public void Publish(TMessage message)
     {
         ObjectDisposedException.ThrowIf(this.disposed, nameof(RabbitMessageQueue<TMessage>));
 
@@ -73,7 +67,7 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
 
         try
         {
-            var json = JsonSerializer.Serialize(message, jsonOptions ?? DefaultJsonOptions);
+            var json = JsonSerializer.Serialize(message, this.messageSerializationOptions);
             var body = Encoding.UTF8.GetBytes(json);
 
             var properties = this.channel.CreateBasicProperties();
@@ -86,16 +80,24 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
 
             this.channel.BasicPublish(this.settings.ExchangeName, this.settings.RoutingKey, true, properties, body);
 
-            this.logInfo($"Message \"{messageId}\" successfully published to exchange \"{this.settings.ExchangeName}\".");
+            this.logger.LogInformation(
+                "Message \"{messageId}\" successfully published to exchange \"{exchangeName}\".",
+                messageId,
+                this.settings.ExchangeName);
         }
         catch (Exception exception)
         {
-            this.logError($"Error while publishing Message \"{messageId}\" to Exchange \"{this.settings.ExchangeName}\": {exception.Message}.");
+            this.logger.LogError(
+                "Error while publishing Message \"{messageId}\" to Exchange \"{exchangeName}\": {errorMessage}.",
+                messageId,
+                this.settings.ExchangeName,
+                exception.Message);
+
             throw;
         }
     }
 
-    public void Consume(Func<TMessage, Task<bool>> handleMessage, JsonSerializerOptions? jsonOptions = null)
+    public void Consume(Func<TMessage, Task<bool>> handleMessage)
     {
         ObjectDisposedException.ThrowIf(this.disposed, nameof(RabbitMessageQueue<TMessage>));
 
@@ -110,7 +112,7 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
                 var body = args.Body.ToArray();
                 var json = Encoding.UTF8.GetString(body);
 
-                var message = JsonSerializer.Deserialize<TMessage>(json, jsonOptions ?? DefaultJsonOptions);
+                var message = JsonSerializer.Deserialize<TMessage>(json, this.messageSerializationOptions);
 
                 if (message == null)
                 {
@@ -122,17 +124,21 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
                 if (isSuccess)
                 {
                     this.channel.BasicAck(args.DeliveryTag, false);
-                    this.logInfo($"Message \"{messageId}\" successfully acked.");
+                    this.logger.LogInformation("Message \"{messageId}\" successfully acked.", messageId);
                 }
                 else
                 {
                     this.channel.BasicNack(args.DeliveryTag, false, true);
-                    this.logInfo($"Message \"{messageId}\" successfully nacked.");
+                    this.logger.LogInformation("Message \"{messageId}\" successfully nacked.", messageId);
                 }
             }
             catch (Exception exception)
             {
-                this.logError($"Error while consuming Message \"{messageId}\": {exception.Message}.");
+                this.logger.LogError(
+                    "Error while consuming Message \"{messageId}\": {errorMessage}.",
+                    messageId,
+                    exception.Message);
+
                 this.channel.BasicNack(args.DeliveryTag, false, true);
             }
         };
@@ -141,7 +147,7 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
 
         this.channel.BasicConsume(this.settings.QueueName, false, consumer);
 
-        this.logInfo($"Started consuming queue \"{this.settings.QueueName}\".");
+        this.logger.LogInformation("Started consuming queue \"{queueName}\".", this.settings.QueueName);
     }
 
     public void Dispose()
@@ -167,11 +173,11 @@ public sealed class RabbitMessageQueue<TMessage> : IRabbitMessageQueue<TMessage>
                 this.connection.Dispose();
             }
 
-            this.logInfo("RabbitMQ connection successfully disposed.");
+            this.logger.LogInformation("RabbitMQ connection successfully disposed.");
         }
         catch (Exception exception)
         {
-            this.logError($"Error while disposing RabbitMQ resources: {exception.Message}.");
+            this.logger.LogError("Error while disposing RabbitMQ resources: {errorMessage}.", exception.Message);
         }
     }
 }

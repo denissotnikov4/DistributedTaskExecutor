@@ -1,6 +1,6 @@
 namespace DistributedTaskExecutor.Core.RabbitMQ;
 
-public class RabbitSettings
+public class RabbitMqSettings
 {
     public string AppName { get; set; }
 
