@@ -1,11 +1,9 @@
-﻿using Core.DI;
+﻿using DistributedTaskExecutor.Core.DI;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using TaskService.Dal.Data;
 using TaskService.Dal.Repositories;
 
-namespace TaskService.Dal.DI;
+namespace TaskService.Api.DI;
 
 public class RepositoriesDiModule : IDiModule
 {

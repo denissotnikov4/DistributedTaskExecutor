@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="ApiKeys.Client" Version="0.0.1" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.22">
       <PrivateAssets>all</PrivateAssets>
@@ -27,18 +28,10 @@
     <ProjectReference Include="..\TaskService.Client\TaskService.Client.csproj" />
     <ProjectReference Include="..\TaskService.Logic\TaskService.Logic.csproj" />
     <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
-    <ProjectReference Include="..\..\ApiKeysService\ApiKeys.Client\ApiKeys.Client.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="Core">
-      <HintPath>..\..\Core\Core\bin\Debug\net8.0\Core.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
 </Project>
-

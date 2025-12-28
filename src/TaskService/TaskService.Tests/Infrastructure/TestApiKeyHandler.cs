@@ -7,9 +7,9 @@ using TaskService.API.Constants;
 
 namespace TaskService.Tests.Infrastructure;
 
-internal class TestApiKeyHandler : AuthenticationHandler<AuthenticationSchemeOptions>
+public class TestApiKeyHandler : AuthenticationHandler<AuthenticationSchemeOptions>
 {
-    public const string TestScheme = "TestApiKey";
+    private const string TestScheme = "TestApiKey";
 
     public TestApiKeyHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,

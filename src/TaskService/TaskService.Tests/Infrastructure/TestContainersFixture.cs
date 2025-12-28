@@ -9,7 +9,7 @@ using TaskService.Dal.Data;
 namespace TaskService.Tests.Infrastructure;
 
 [SetUpFixture]
-internal class TestContainersFixture
+public class TestContainersFixture
 {
     private PostgreSqlContainer postgresContainer = null!;
     private Respawner respawner = null!;

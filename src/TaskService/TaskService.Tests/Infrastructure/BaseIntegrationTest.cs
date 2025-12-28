@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Authentication;
+﻿using DistributedTaskExecutor.Core.RabbitMQ;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -7,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 using Moq;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
-using TaskService.Core.RabbitMQ;
 using TaskService.Dal.Data;
 using TaskService.Dal.Models;
 using TaskService.Dal.Repositories;
@@ -17,7 +17,7 @@ using Program = TaskService.Api.Program;
 namespace TaskService.Tests.Infrastructure;
 
 [TestFixture]
-internal abstract class BaseIntegrationTest
+public abstract class BaseIntegrationTest
 {
     private const string TestEnvironmentName = "Test";
     

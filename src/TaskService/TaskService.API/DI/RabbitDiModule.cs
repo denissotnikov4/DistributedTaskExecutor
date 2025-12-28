@@ -1,5 +1,8 @@
-using Core.DI;
-using TaskService.Core.RabbitMQ;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+using DistributedTaskExecutor.Core.DI;
+using DistributedTaskExecutor.Core.RabbitMQ;
 
 namespace TaskService.Api.DI;
 
@@ -10,13 +13,18 @@ public class RabbitDiModule : IDiModule
         services.AddSingleton<IRabbitMessageQueue<Guid>>(
             serviceProvider =>
             {
-                var logger = serviceProvider.GetRequiredService<ILogger<IRabbitMessageQueue<Guid>>>();
-                var settings = serviceProvider.GetRequiredService<RabbitSettings>();
+                var settings = serviceProvider.GetRequiredService<RabbitMqSettings>();
 
-                return new RabbitMessageQueue<Guid>(
-                    settings,
-                    infoMessage => logger.LogInformation(infoMessage),
-                    errorMessage => logger.LogError(errorMessage));
+                var jsonOptions = new JsonSerializerOptions
+                {
+                    WriteIndented = false,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                };
+
+                var logger = serviceProvider.GetRequiredService<ILogger<RabbitMessageQueue<Guid>>>();
+
+                return new RabbitMessageQueue<Guid>(settings, jsonOptions, logger);
             });
     }
 }

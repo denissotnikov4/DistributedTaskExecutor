@@ -1,9 +1,9 @@
 using ApiKeys.Client.Auth;
 using Microsoft.AspNetCore.Mvc;
 using TaskService.API.Constants;
-using TaskService.Api.DTO.Responses;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
+using TaskService.Client.Models.Tasks.Responses;
 using TaskService.Logic.Services.Tasks;
 
 namespace TaskService.Api.Controllers;

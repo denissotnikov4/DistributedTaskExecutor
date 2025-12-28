@@ -1,7 +1,6 @@
-using AutoMapper;
+using DistributedTaskExecutor.Core.RabbitMQ;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
-using TaskService.Core.RabbitMQ;
 using TaskService.Dal.Repositories;
 using TaskService.Logic.Exceptions;
 using TaskService.Logic.Mappings;
@@ -9,7 +8,7 @@ using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
 
-internal class TaskService : ITaskService
+public class TaskService : ITaskService
 {
     private readonly ITaskRepository taskRepository;
     private readonly IRabbitMessageQueue<Guid> messageQueue;
