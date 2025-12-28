@@ -460,4 +460,194 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         dbTask.Should().NotBeNull();
         dbTask!.Code.Should().Be(request.Code);
     }
+    
+    [Test]
+    public async Task UpdateTaskAsync_ExistingTask_UpdatesPartialFields()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(
+            name: "Old Name",
+            code: "old code",
+            status: TaskStatus.Completed);
+        
+        var updateRequest = new TaskUpdateRequest
+        {
+            Name = "New Name",
+            Code = null,
+            Status = null
+        };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.Name.Should().Be(updateRequest.Name);
+        dbTask.Code.Should().Be("old code");
+        dbTask.Status.Should().Be(TaskStatus.Completed);
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_NonExistingTask_ReturnsNotFound()
+    {
+        // Arrange
+        var nonExistingId = Guid.NewGuid();
+        var updateRequest = new TaskUpdateRequest { Name = "New Name" };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{nonExistingId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_EmptyUpdateRequest_KeepsOriginalValues()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(
+            name: "Original Name",
+            code: "original code",
+            language: ProgrammingLanguage.CSharp);
+        
+        var emptyRequest = new TaskUpdateRequest();
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", emptyRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.Name.Should().Be("Original Name");
+        dbTask.Code.Should().Be("original code");
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_UpdateMultipleFields_MapsCorrectly()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(
+            name: "Before Update",
+            language: ProgrammingLanguage.CSharp,
+            ttl: TimeSpan.FromMinutes(30));
+        
+        var updateRequest = new TaskUpdateRequest
+        {
+            Name = "Updated Name",
+            Language = ProgrammingLanguage.Python,
+            Ttl = TimeSpan.FromHours(2),
+            InputData = "{\"new\": \"data\"}"
+        };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.Name.Should().Be(updateRequest.Name);
+        dbTask.Language.Should().Be(ProgrammingLanguage.Python);
+        dbTask.Ttl.Should().Be(TimeSpan.FromHours(2));
+        dbTask.InputData.Should().Be("{\"new\": \"data\"}");
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_UpdateStatusToPending_TimestampsAreNotReset()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(
+            status: TaskStatus.Completed);
+
+        var updateRequest = new TaskUpdateRequest
+        {
+            Status = TaskStatus.Pending
+        };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.Status.Should().Be(TaskStatus.Pending);
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_UpdateUserId_ChangesOwnership()
+    {
+        // Arrange
+        var oldUserId = Guid.NewGuid();
+        var newUserId = Guid.NewGuid();
+        
+        var taskId = await CreateTestTaskInDbAsync(userId: oldUserId);
+        
+        var updateRequest = new TaskUpdateRequest
+        {
+            UserId = newUserId
+        };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.UserId.Should().Be(newUserId);
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_WithNullValues_IgnoresNullFields()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(
+            name: "Keep This Name",
+            errorMessage: "Keep This Error");
+        
+        var updateRequest = new TaskUpdateRequest
+        {
+            Name = null,
+            ErrorMessage = null
+        };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask.Should().NotBeNull();
+        dbTask!.Name.Should().Be("Keep This Name");
+        dbTask.ErrorMessage.Should().Be("Keep This Error");
+    }
+
+    [Test]
+    public async Task UpdateTaskAsync_LongTtlValue_SavesCorrectly()
+    {
+        // Arrange
+        var taskId = await CreateTestTaskInDbAsync(ttl: TimeSpan.FromMinutes(10));
+        var longTtl = TimeSpan.FromDays(30);
+        
+        var updateRequest = new TaskUpdateRequest { Ttl = longTtl };
+
+        // Act
+        var response = await Client.PatchAsJsonAsync($"/api/tasks/{taskId}", updateRequest);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        
+        var dbTask = await TaskRepository.GetByIdAsync(taskId);
+        dbTask!.Ttl.Should().Be(longTtl);
+    }
 }

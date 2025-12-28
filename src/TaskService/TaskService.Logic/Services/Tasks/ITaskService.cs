@@ -12,4 +12,6 @@ public interface ITaskService
     Task<ICollection<ClientTask>> GetAllTasksAsync(CancellationToken cancellationToken = default);
 
     Task RetryTaskAsync(Guid id, CancellationToken cancellationToken = default);
+    
+    Task UpdateTaskAsync(Guid id, TaskUpdateRequest taskUpdateRequest, CancellationToken cancellationToken = default);
 }

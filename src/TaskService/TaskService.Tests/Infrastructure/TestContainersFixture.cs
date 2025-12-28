@@ -16,20 +16,18 @@ internal class TestContainersFixture
     private DbConnection dbConnection = null!;
 
     public string ConnectionString { get; private set; } = null!;
-    
+
     public bool IsInitialized { get; private set; } = false;
 
     [OneTimeSetUp]
     public async Task GlobalSetup()
     {
-        // Проверяем доступность Docker
         if (!IsDockerAvailable())
         {
-            Console.WriteLine("⚠️  Docker is not available. Integration tests will be skipped.");
+            Console.WriteLine("⚠Docker is not available. Integration tests will be skipped.");
             return;
         }
 
-        // Запускаем PostgreSQL контейнер
         postgresContainer = new PostgreSqlBuilder()
             .WithImage("postgres:15-alpine")
             .WithDatabase("taskservice_test")
@@ -42,7 +40,7 @@ internal class TestContainersFixture
         await postgresContainer.StartAsync();
         ConnectionString = postgresContainer.GetConnectionString();
         
-        Console.WriteLine($"✅ Test database started: {ConnectionString}");
+        Console.WriteLine($"Test database started: {ConnectionString}");
 
         await ApplyMigrationsAsync();
 
@@ -56,18 +54,18 @@ internal class TestContainersFixture
     {
         if (IsInitialized)
         {
-            if (dbConnection != null)
+            if (this.dbConnection != null)
             {
-                await dbConnection.CloseAsync();
-                await dbConnection.DisposeAsync();
+                await this.dbConnection.CloseAsync();
+                await this.dbConnection.DisposeAsync();
             }
             
-            if (postgresContainer != null)
+            if (this.postgresContainer != null)
             {
-                await postgresContainer.DisposeAsync();
+                await this.postgresContainer.DisposeAsync();
             }
             
-            Console.WriteLine("✅ Test database stopped");
+            Console.WriteLine("Test database stopped");
         }
     }
     
@@ -85,26 +83,20 @@ internal class TestContainersFixture
     {
         await using var dbContext = CreateDbContext();
         
-        // Проверяем состояние миграций
         var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
-        Console.WriteLine($"📊 Pending migrations: {pendingMigrations.Count()}");
-        foreach (var migration in pendingMigrations)
-        {
-            Console.WriteLine($"  - {migration}");
-        }
-        
+
         if (pendingMigrations.Any())
         {
             await dbContext.Database.EnsureDeletedAsync();
             
             await dbContext.Database.MigrateAsync();
-            Console.WriteLine("✅ Database migrations applied");
+            Console.WriteLine("Database migrations applied");
         }
         else
         {
-            Console.WriteLine("✅ No pending migrations to apply");
+            Console.WriteLine("No pending migrations to apply");
         }
-        Console.WriteLine("✅ Database migrations applied");
+        Console.WriteLine("Database migrations applied");
     }
     
     private async Task SetupRespawnAsync()
@@ -112,7 +104,7 @@ internal class TestContainersFixture
         dbConnection = new NpgsqlConnection(ConnectionString);
         await dbConnection.OpenAsync();
         
-        respawner = await Respawner.CreateAsync(dbConnection, new RespawnerOptions
+        respawner = await Respawner.CreateAsync(this.dbConnection, new RespawnerOptions
         {
             DbAdapter = DbAdapter.Postgres,
             SchemasToInclude = ["public"],
@@ -131,7 +123,7 @@ internal class TestContainersFixture
         
         return new TaskDbContext(options);
     }
-    
+
     private bool IsDockerAvailable()
     {
         try

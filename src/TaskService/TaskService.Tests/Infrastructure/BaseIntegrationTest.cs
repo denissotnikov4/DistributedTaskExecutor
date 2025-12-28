@@ -19,6 +19,8 @@ namespace TaskService.Tests.Infrastructure;
 [TestFixture]
 internal abstract class BaseIntegrationTest
 {
+    private const string TestEnvironmentName = "Test";
+    
     private WebApplicationFactory<Program> _factory = null!;
     private HttpClient _client = null!;
     private IServiceScope _scope = null!;
@@ -32,7 +34,6 @@ internal abstract class BaseIntegrationTest
     
     public async Task InitializeAsync()
     {
-        // Инициализируем Testcontainers (один раз для всех тестов)
         if (!_testContainersFixture.IsInitialized)
         {
             await _testContainersFixture.GlobalSetup();
@@ -41,7 +42,6 @@ internal abstract class BaseIntegrationTest
     
     public async Task DisposeAsync()
     {
-        // Очищаем ресурсы после каждого теста
         await CleanupAsync();
     }
     
@@ -55,12 +55,10 @@ internal abstract class BaseIntegrationTest
                 Assert.Ignore("Docker is not available. Skipping integration tests.");
                 return;
             }
-            
-            // Инициализируем контейнер при первом запуске
+
             await _testContainersFixture.GlobalSetup();
         }
         
-        // Очищаем БД перед каждым тестом
         await _testContainersFixture.ResetDatabaseAsync();
         
         _rabbitMqMock = new Mock<IRabbitMessageQueue<Guid>>();
@@ -70,7 +68,6 @@ internal abstract class BaseIntegrationTest
             {
                 builder.ConfigureServices(services =>
                 {
-                    // Удаляем существующую регистрацию RabbitMQ
                     var rabbitMqDescriptor = services.FirstOrDefault(
                         d => d.ServiceType == typeof(IRabbitMessageQueue<Guid>));
                     if (rabbitMqDescriptor != null)
@@ -78,10 +75,8 @@ internal abstract class BaseIntegrationTest
                         services.Remove(rabbitMqDescriptor);
                     }
                     
-                    // Добавляем мок
                     services.AddSingleton(_rabbitMqMock.Object);
                     
-                    // Удаляем существующий DbContext
                     var dbContextDescriptor = services.FirstOrDefault(
                         d => d.ServiceType == typeof(DbContextOptions<TaskDbContext>));
                     if (dbContextDescriptor != null)
@@ -89,14 +84,14 @@ internal abstract class BaseIntegrationTest
                         services.Remove(dbContextDescriptor);
                     }
                     
-                    services.AddAuthentication("ApiKey")  // Имя схемы из ApiKeyAuthConstants.SchemeName
+                    services.AddAuthentication("ApiKey")
                         .AddScheme<AuthenticationSchemeOptions, TestApiKeyHandler>("ApiKey", _ => { });
 
                     
                     services.AddAuthorization(options =>
                     {
                         options.AddPolicy("ApiKeyClaims_tasks:write", policy => 
-                            policy.RequireAssertion(_ => true));  // Разрешаем всегда
+                            policy.RequireAssertion(_ => true));
         
                         options.AddPolicy("ApiKeyClaims_tasks:read", policy => 
                             policy.RequireAssertion(_ => true));
@@ -109,7 +104,6 @@ internal abstract class BaseIntegrationTest
                             .Build();
                     });
                     
-                    // Добавляем реальную PostgreSQL БД из контейнера
                     services.AddDbContext<TaskDbContext>(options =>
                     {
                         options.UseNpgsql(_testContainersFixture.ConnectionString);
@@ -118,8 +112,7 @@ internal abstract class BaseIntegrationTest
                     });
                 });
                 
-                // Используем тестовое окружение
-                builder.UseEnvironment("Test");
+                builder.UseEnvironment(TestEnvironmentName);
             });
 
         _client = _factory.CreateClient();
@@ -145,8 +138,7 @@ internal abstract class BaseIntegrationTest
     {
         await _testContainersFixture.ResetDatabaseAsync();
     }
-    
-    // Дополнительный статический метод для глобальной очистки
+
     [OneTimeTearDown]
     public static async Task OneTimeTearDown()
     {
@@ -155,8 +147,7 @@ internal abstract class BaseIntegrationTest
             await _testContainersFixture.GlobalTeardown();
         }
     }
-    
-    // Остальные методы остаются без изменений
+
     protected async Task<Guid> CreateTestTaskInDbAsync(
         Guid? userId = null,
         string? name = null,

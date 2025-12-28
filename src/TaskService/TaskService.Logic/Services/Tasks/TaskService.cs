@@ -1,3 +1,4 @@
+using AutoMapper;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Core.RabbitMQ;
@@ -64,5 +65,20 @@ internal class TaskService : ITaskService
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
 
         this.messageQueue.Publish(id);
+    }
+
+    public async Task UpdateTaskAsync(
+        Guid id, TaskUpdateRequest taskUpdateRequest, CancellationToken cancellationToken = default)
+    {
+        var existingTask = await this.taskRepository.GetByIdAsync(id, cancellationToken);
+
+        if (existingTask == null)
+        {
+            throw new TaskNotFoundException(id);
+        }
+
+        var serverTask = existingTask.UpdateServerTaskFromRequest(taskUpdateRequest);
+
+        await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
     }
 }

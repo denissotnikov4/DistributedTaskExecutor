@@ -60,6 +60,8 @@ public class TasksController : ControllerBase
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult> UpdateTaskAsync(Guid id, TaskUpdateRequest updateRequest)
     {
+        await this.taskService.UpdateTaskAsync(id, updateRequest);
+
         return this.Ok();
     }
 
