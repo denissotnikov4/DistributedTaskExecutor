@@ -33,7 +33,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\TaskService.Api\TaskService.Api.csproj" />
-      <ProjectReference Include="..\TaskService.Core\TaskService.Core.csproj" />
       <ProjectReference Include="..\TaskService.Dal\TaskService.Dal.csproj" />
       <ProjectReference Include="..\TaskService.Logic\TaskService.Logic.csproj" />
     </ItemGroup>

@@ -4,7 +4,7 @@ using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Exceptions;
 
-internal class TaskCannotBeRetriedException : TaskServiceException
+public class TaskCannotBeRetriedException : TaskServiceException
 {
     private Guid TaskId { get; }
     private TaskStatus Status { get; }

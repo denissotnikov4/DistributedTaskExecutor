@@ -1,4 +1,4 @@
-using Core.DI;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 
@@ -13,4 +13,3 @@ public class MainDiModule : IDiModule
         new SwaggerDiModule().RegisterIn(services, configuration);
     }
 }
-

@@ -1,6 +1,4 @@
-using Core.DI;
-using TaskService.Dal.DI;
-using TaskService.Logic.DI;
+using DistributedTaskExecutor.Core.DI;
 
 namespace TaskService.Api.DI;
 
@@ -9,6 +7,7 @@ public class MainDiModule : IDiModule
     private readonly ICollection<IDiModule> modules = new List<IDiModule>
     {
         new LogicDiModule(),
+        new AuthDiModule(),
         new RabbitDiModule(),
         new RepositoriesDiModule(),
         new ValidatorsDiModule()

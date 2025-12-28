@@ -1,6 +1,6 @@
 using ApiKeys.Api.Constants;
-using Core.Auth;
-using Core.DI;
+using DistributedTaskExecutor.Core.Auth;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 

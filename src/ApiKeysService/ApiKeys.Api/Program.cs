@@ -1,5 +1,5 @@
 using ApiKeys.Api.DI;
-using Core.Configuration;
+using DistributedTaskExecutor.Core.Configuration;
 using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);

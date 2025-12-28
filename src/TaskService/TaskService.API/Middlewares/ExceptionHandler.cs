@@ -5,7 +5,7 @@ using TaskService.Logic.Exceptions.Base;
 
 namespace TaskService.Api.Middlewares;
 
-internal class ExceptionHandler
+public class ExceptionHandler
 {
     private readonly RequestDelegate next;
     private readonly IWebHostEnvironment environment;

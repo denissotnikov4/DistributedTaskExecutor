@@ -1,5 +1,5 @@
 using ApiKeys.Client;
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 using Microsoft.Extensions.Logging;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
@@ -23,9 +23,15 @@ public class TaskServiceClient : ITaskServiceClient
             throw new ArgumentNullException(nameof(baseUrl));
         }
 
+        if (string.IsNullOrWhiteSpace(apiKey))
+        {
+            throw new ArgumentNullException(nameof(apiKey));
+        }
+
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
         this.httpClient.AddApiKey(apiKey);
-        this.logger = logger;
     }
 
     public async Task<ClientResult<ClientTask>> GetTaskByIdAsync(Guid id, CancellationToken cancelToken = default)

@@ -1,5 +1,5 @@
-using Core.DI;
-using Core.Swagger;
+using DistributedTaskExecutor.Core.DI;
+using DistributedTaskExecutor.Core.Swagger;
 using Microsoft.OpenApi.Models;
 
 namespace ApiKeys.Api.DI;

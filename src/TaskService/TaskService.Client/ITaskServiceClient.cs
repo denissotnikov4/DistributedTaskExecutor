@@ -1,4 +1,4 @@
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 

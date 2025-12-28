@@ -5,7 +5,7 @@ using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Dal.Repositories;
 
-internal class TaskRepository : ITaskRepository
+public class TaskRepository : ITaskRepository
 {
     private readonly TaskDbContext context;
 

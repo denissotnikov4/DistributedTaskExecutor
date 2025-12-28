@@ -3,16 +3,16 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using FluentAssertions;
 using Moq;
-using TaskService.Api.DTO.Responses;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
+using TaskService.Client.Models.Tasks.Responses;
 using TaskService.Tests.Infrastructure;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Tests;
 
 [TestFixture]
-internal class TaskServiceIntegrationTests : BaseIntegrationTest
+public class TaskServiceIntegrationTests : BaseIntegrationTest
 {
     [Test]
     public async Task CreateTaskAsync_ValidRequest_ReturnsCreatedAndPublishesMessage()
@@ -21,7 +21,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         var request = CreateValidTaskRequest();
         
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
 
         // Act
@@ -62,7 +62,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
-        RabbitMqMock.Verify(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()), Times.Never);
+        RabbitMqMock.Verify(x => x.Publish(It.IsAny<Guid>()), Times.Never);
     }
 
     [Test]
@@ -179,7 +179,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             ttl: TimeSpan.FromMinutes(45));
         
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
         
         // Act
@@ -218,7 +218,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             ttl: TimeSpan.FromHours(1));
         
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
         
         // Act
@@ -247,7 +247,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             retryCount: 0);
         
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
         
         // Act
@@ -324,7 +324,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
         };
 
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
 
         // Act
@@ -389,7 +389,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             retryCount: 5);
         
         var publishedTaskIds = new List<Guid>();
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()))
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()))
             .Callback<Guid, JsonSerializerOptions?>((id, _) => publishedTaskIds.Add(id));
         
         // Act
@@ -416,7 +416,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             Ttl = TimeSpan.FromMinutes(10)
         };
 
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()));
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/tasks", request);
@@ -445,7 +445,7 @@ internal class TaskServiceIntegrationTests : BaseIntegrationTest
             Ttl = TimeSpan.FromMinutes(20)
         };
 
-        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>(), It.IsAny<JsonSerializerOptions?>()));
+        RabbitMqMock.Setup(x => x.Publish(It.IsAny<Guid>()));
 
         // Act
         var response = await Client.PostAsJsonAsync("/api/tasks", request);

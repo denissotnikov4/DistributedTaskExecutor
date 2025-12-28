@@ -1,5 +1,5 @@
 using ApiKeys.Client.Models;
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 
 namespace ApiKeys.Client;
 

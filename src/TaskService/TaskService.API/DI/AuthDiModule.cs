@@ -1,6 +1,6 @@
 using ApiKeys.Client;
 using ApiKeys.Client.Extensions;
-using Core.DI;
+using DistributedTaskExecutor.Core.DI;
 
 namespace TaskService.Api.DI;
 

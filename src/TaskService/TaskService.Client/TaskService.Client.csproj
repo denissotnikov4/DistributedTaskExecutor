@@ -7,11 +7,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\..\Core\Core\Core.csproj" />
-      <ProjectReference Include="..\..\ApiKeysService\ApiKeys.Client\ApiKeys.Client.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
+      <PackageReference Include="ApiKeys.Client" Version="0.0.1" />
+      <PackageReference Include="DistributedTaskExecutor.Core" Version="0.0.1" />
       <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.0" />
     </ItemGroup>
 
