@@ -1,4 +1,6 @@
 using Core.DI;
+using TaskService.Dal.DI;
+using TaskService.Logic.DI;
 
 namespace TaskService.Api.DI;
 

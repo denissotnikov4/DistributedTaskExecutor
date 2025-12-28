@@ -16,8 +16,6 @@ public class TaskUpdateRequest
 
     public TaskStatus? Status { get; set; }
 
-    public DateTime? CreatedAt { get; set; }
-
     public DateTime? StartedAt { get; set; }
 
     public DateTime? CompletedAt { get; set; }
@@ -25,6 +23,4 @@ public class TaskUpdateRequest
     public TimeSpan? Ttl { get; set; }
 
     public string? ErrorMessage { get; set; }
-
-    public int? RetryCount { get; set; }
 }
