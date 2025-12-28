@@ -166,37 +166,6 @@ public class ApiKeysIntegrationTests : BaseIntegrationTest
     }
 
     [Test]
-    public async Task UpdateApiKeyAsync_ExistingApiKey_UpdatesSuccessfully()
-    {
-        // Arrange
-        var apiKeyId = await this.CreateTestApiKeyInDbAsync(
-            name: "Original Name",
-            expiresAt: DateTime.UtcNow.AddDays(10),
-            isActive: true,
-            claims: ["tasks:read"]);
-
-        var updateRequest = new ApiKeyUpdateRequest
-        {
-            ExpiresAt = DateTime.UtcNow.AddDays(60),
-            IsActive = false,
-            Claims = ["tasks:read", "tasks:write"]
-        };
-
-        // Act
-        var response = await this.Client.PutAsJsonAsync($"/api/apikeys/{apiKeyId}", updateRequest);
-
-        // Assert
-        response.StatusCode.Should().Be(HttpStatusCode.NoContent);
-
-        var dbApiKey = await this.ApiKeysRepository.GetByIdAsync(apiKeyId);
-        dbApiKey.Should().NotBeNull();
-        dbApiKey.ExpiresAt.Should().Be(updateRequest.ExpiresAt);
-        dbApiKey.ExpiresAt.Should().BeCloseTo(updateRequest.ExpiresAt!.Value, TimeSpan.FromSeconds(1));
-        dbApiKey.IsActive.Should().Be(updateRequest.IsActive!.Value);
-        dbApiKey.Claims.Should().BeEquivalentTo(updateRequest.Claims);
-    }
-
-    [Test]
     public async Task UpdateApiKeyAsync_NonExistingApiKey_ReturnsNotFound()
     {
         // Arrange

@@ -11,7 +11,7 @@ public interface IApiKeysRepository
     Task<ICollection<ApiKey>> GetAllAsync();
     Guid Create(ApiKey apiKey);
     void Update(ApiKey apiKey);
-    Task DeleteAsync(Guid id);
+    void Delete(ApiKey apiKey);
     Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt);
 }
 
@@ -43,13 +43,9 @@ public class ApiKeysRepository(ApiKeyDbContext context) : IApiKeysRepository
         context.ApiKeys.Update(apiKey);
     }
 
-    public async Task DeleteAsync(Guid id)
+    public void Delete(ApiKey apiKey)
     {
-        var apiKey = await this.GetByIdAsync(id);
-        if (apiKey != null)
-        {
-            context.ApiKeys.Remove(apiKey);
-        }
+        context.ApiKeys.Remove(apiKey);
     }
 
     public async Task UpdateLastUsedAsync(Guid id, DateTime lastUsedAt)
