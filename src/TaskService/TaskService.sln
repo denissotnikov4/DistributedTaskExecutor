@@ -12,6 +12,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Logic", "TaskSe
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Dal", "TaskService.Dal\TaskService.Dal.csproj", "{90E91B37-459F-4306-9C0E-31790E9CEA10}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TaskService.Tests", "TaskService.Tests\TaskService.Tests.csproj", "{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{8D8B521B-0D6F-488D-840E-9EEEB9A76D3A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,11 +38,16 @@ Global
 		{90E91B37-459F-4306-9C0E-31790E9CEA10}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{90E91B37-459F-4306-9C0E-31790E9CEA10}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{90E91B37-459F-4306-9C0E-31790E9CEA10}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
 		{DFF77F96-98A7-4D80-8A24-6DEE78E43FCA} = {67CA649C-BB6F-4AE1-B64E-C4DEA6108778}
+		{DDA17D9F-9BC8-4716-B256-1F70E44DC4CF} = {8D8B521B-0D6F-488D-840E-9EEEB9A76D3A}
 	EndGlobalSection
 EndGlobal

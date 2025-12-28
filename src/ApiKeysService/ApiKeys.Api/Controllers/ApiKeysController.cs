@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using ApiKeys.Api.Configuration;
+using ApiKeys.Api.Constants;
 using ApiKeys.Client.Models;
 using ApiKeys.Logic.Services.ApiKeys;
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -25,7 +25,7 @@ public class ApiKeysController(IApiKeysService apiKeysService) : ControllerBase
 
         return result.ToActionResult(
             this,
-            response => CreatedAtAction(nameof(CreateApiKey), new { id = response.Id }, response)
+            response => this.CreatedAtAction(nameof(this.CreateApiKey), new { id = response.Id }, response)
         );
     }
 

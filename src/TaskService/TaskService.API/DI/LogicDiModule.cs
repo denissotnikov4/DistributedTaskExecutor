@@ -1,3 +1,4 @@
+using DistributedTaskExecutor.Core.DI;
 using TaskService.Logic.Services.Tasks;
 
 namespace TaskService.Api.DI;

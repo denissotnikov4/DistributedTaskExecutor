@@ -1,8 +1,9 @@
+using DistributedTaskExecutor.Core.RabbitMQ;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Dal.Repositories;
+using TaskService.Logic.Exceptions;
 using TaskService.Logic.Mappings;
-using TaskService.Logic.Services.Messaging;
 using TaskStatus = TaskService.Client.Models.Tasks.TaskStatus;
 
 namespace TaskService.Logic.Services.Tasks;
@@ -10,11 +11,9 @@ namespace TaskService.Logic.Services.Tasks;
 public class TaskService : ITaskService
 {
     private readonly ITaskRepository taskRepository;
-    private readonly ITaskMessageQueue messageQueue;
+    private readonly IRabbitMessageQueue<Guid> messageQueue;
 
-    public TaskService(
-        ITaskRepository taskRepository,
-        ITaskMessageQueue messageQueue)
+    public TaskService(IRabbitMessageQueue<Guid> messageQueue, ITaskRepository taskRepository)
     {
         this.taskRepository = taskRepository ?? throw new ArgumentNullException(nameof(taskRepository));
         this.messageQueue = messageQueue ?? throw new ArgumentNullException(nameof(messageQueue));
@@ -22,15 +21,9 @@ public class TaskService : ITaskService
 
     public async Task<Guid> CreateTaskAsync(TaskCreateRequest request, CancellationToken cancellationToken = default)
     {
-        var serverTask = request.ToServerModel();
-        var taskId = await this.taskRepository.CreateAsync(serverTask, cancellationToken);
+        var taskId = await this.taskRepository.CreateAsync(request.ToServerModel(), cancellationToken);
 
-        var createdTask = await this.taskRepository.GetByIdAsync(taskId, cancellationToken);
-        if (createdTask != null)
-        {
-            var clientTask = createdTask.ToClientModel();
-            await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
-        }
+        this.messageQueue.Publish(taskId);
 
         return taskId;
     }
@@ -53,12 +46,12 @@ public class TaskService : ITaskService
 
         if (serverTask == null)
         {
-            throw new InvalidOperationException($"Task with id {id} not found.");
+            throw new TaskNotFoundException(id);
         }
 
         if (serverTask.Status is TaskStatus.Pending or TaskStatus.InProgress)
         {
-            throw new InvalidOperationException($"Task {id} cannot be retried due to current status: {serverTask.Status}.");
+            throw new TaskCannotBeRetriedException(id, serverTask.Status);
         }
 
         serverTask.Result = null;
@@ -66,11 +59,25 @@ public class TaskService : ITaskService
         serverTask.StartedAt = null;
         serverTask.CompletedAt = null;
         serverTask.ErrorMessage = null;
-        serverTask.RetryCount++;
+        serverTask.RetryCount += 1;
 
         await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
 
-        var clientTask = serverTask.ToClientModel();
-        await this.messageQueue.PublishTaskAsync(clientTask, cancellationToken);
+        this.messageQueue.Publish(id);
+    }
+
+    public async Task UpdateTaskAsync(
+        Guid id, TaskUpdateRequest taskUpdateRequest, CancellationToken cancellationToken = default)
+    {
+        var existingTask = await this.taskRepository.GetByIdAsync(id, cancellationToken);
+
+        if (existingTask == null)
+        {
+            throw new TaskNotFoundException(id);
+        }
+
+        var serverTask = existingTask.UpdateServerTaskFromRequest(taskUpdateRequest);
+
+        await this.taskRepository.UpdateAsync(serverTask, cancellationToken);
     }
 }

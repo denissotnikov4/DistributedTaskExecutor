@@ -1,5 +1,5 @@
 using ApiKeys.Dal.Data;
-using Core.Database;
+using DistributedTaskExecutor.Core.Database;
 
 namespace ApiKeys.Dal.Repositories;
 
@@ -14,7 +14,7 @@ public class ApiKeysUnitOfWork : UnitOfWork, IApiKeysUnitOfWork
         IApiKeysRepository apiKeysRepository,
         ApiKeyDbContext dbContext) : base(dbContext)
     {
-        ApiKeys = apiKeysRepository;
+        this.ApiKeys = apiKeysRepository;
     }
 
     public IApiKeysRepository ApiKeys { get; }

@@ -1,6 +1,6 @@
-using ApiKeys.Api.Configuration;
-using Core.Auth;
-using Core.DI;
+using ApiKeys.Api.Constants;
+using DistributedTaskExecutor.Core.Auth;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 
@@ -12,7 +12,7 @@ public class AuthDiModule : IDiModule
         services.AddAuthorization(options =>
         {
             options.AddPolicy(AuthPolicies.ManageApiKey, policy => 
-                policy.RequireClaim("claim", Claims.ManageApiKey));
+                policy.RequireClaim("claim", JwtClaims.ManageApiKey));
         });
     }
 }

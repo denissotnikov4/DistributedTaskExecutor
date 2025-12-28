@@ -1,6 +1,6 @@
 using ApiKeys.Logic.Services.ApiKeys;
 using ApiKeys.Logic.Services.Auth;
-using Core.DI;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 
