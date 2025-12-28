@@ -3,7 +3,7 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using TaskService.API.Constants;
+using TaskService.Api.Constants;
 
 namespace TaskService.Tests.Infrastructure;
 
