@@ -1,6 +1,6 @@
 using ApiKeys.Client.Auth;
 using Microsoft.AspNetCore.Mvc;
-using TaskService.API.Constants;
+using TaskService.Api.Constants;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;
 using TaskService.Client.Models.Tasks.Responses;

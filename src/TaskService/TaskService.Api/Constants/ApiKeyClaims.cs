@@ -1,4 +1,4 @@
-namespace TaskService.API.Constants;
+namespace TaskService.Api.Constants;
 
 public static class ApiKeyClaims
 {
