@@ -91,7 +91,14 @@ public class ApiKeysService(
 
     public async Task<Result> DeleteApiKeyAsync(Guid id)
     {
-        await unitOfWork.ApiKeys.DeleteAsync(id);
+        var apiKey = await unitOfWork.ApiKeys.GetByIdAsync(id);
+
+        if (apiKey is null)
+        {
+            return ServiceError.NotFound($"Api-Key with id {id} not found");
+        }
+        
+        unitOfWork.ApiKeys.Delete(apiKey);
         await unitOfWork.SaveChangesAsync();
         
         logger.LogInformation("Api-Key deleted with id: {ApiKeyId}", id);

@@ -304,18 +304,21 @@ public class ApiKeysServiceTests
     public async Task DeleteApiKeyAsync_WithValidId_ReturnsSuccess()
     {
         // Arrange
-        var apiKeyId = Guid.NewGuid();
+        var apiKey = new ApiKey
+        {
+            Id = Guid.NewGuid()
+        };
         var repositoryMock = new Mock<IApiKeysRepository>();
-        repositoryMock.Setup(x => x.DeleteAsync(apiKeyId)).Returns(Task.CompletedTask);
+        repositoryMock.Setup(x => x.GetByIdAsync(apiKey.Id)).ReturnsAsync(apiKey);
         this.unitOfWorkMock.Setup(x => x.ApiKeys).Returns(repositoryMock.Object);
         this.unitOfWorkMock.Setup(x => x.SaveChangesAsync()).Returns(Task.CompletedTask);
 
         // Act
-        var result = await this.service.DeleteApiKeyAsync(apiKeyId);
+        var result = await this.service.DeleteApiKeyAsync(apiKey.Id);
 
         // Assert
         result.IsSuccess.Should().BeTrue();
-        repositoryMock.Verify(x => x.DeleteAsync(apiKeyId), Times.Once);
+        repositoryMock.Verify(x => x.Delete(apiKey), Times.Once);
         this.unitOfWorkMock.Verify(x => x.SaveChangesAsync(), Times.Once);
     }
 
