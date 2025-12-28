@@ -1,4 +1,4 @@
-name: Publish Client (NuGet)
+name: Publish TaskService Client (NuGet)
 
 on:
   workflow_dispatch:
