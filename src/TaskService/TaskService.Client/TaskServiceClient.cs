@@ -1,5 +1,4 @@
-using ApiKeys.Client;
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 using Microsoft.Extensions.Logging;
 using TaskService.Client.Models.Tasks;
 using TaskService.Client.Models.Tasks.Requests;

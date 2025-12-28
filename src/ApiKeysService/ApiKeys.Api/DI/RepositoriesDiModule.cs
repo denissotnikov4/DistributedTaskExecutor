@@ -1,7 +1,7 @@
 using ApiKeys.Dal.Data;
 using ApiKeys.Dal.Repositories;
-using Core.Database;
-using Core.DI;
+using DistributedTaskExecutor.Core.Database;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 

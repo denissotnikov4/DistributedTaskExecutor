@@ -1,7 +1,7 @@
 using ApiKeys.Client.Models;
 using ApiKeys.Dal.Models;
 using ApiKeys.Dal.Repositories;
-using Core.Results;
+using DistributedTaskExecutor.Core.Results;
 using Microsoft.Extensions.Logging;
 
 namespace ApiKeys.Logic.Services.ApiKeys;

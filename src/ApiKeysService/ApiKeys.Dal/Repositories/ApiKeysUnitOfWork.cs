@@ -1,5 +1,5 @@
 using ApiKeys.Dal.Data;
-using Core.Database;
+using DistributedTaskExecutor.Core.Database;
 
 namespace ApiKeys.Dal.Repositories;
 

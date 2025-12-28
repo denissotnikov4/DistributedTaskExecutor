@@ -1,6 +1,6 @@
 using ApiKeys.Logic.Configuration;
-using Core.Configuration;
-using Core.DI;
+using DistributedTaskExecutor.Core.Configuration;
+using DistributedTaskExecutor.Core.DI;
 
 namespace ApiKeys.Api.DI;
 

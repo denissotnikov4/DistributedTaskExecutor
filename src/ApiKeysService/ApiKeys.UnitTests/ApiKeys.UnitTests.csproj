@@ -33,7 +33,6 @@
       <ProjectReference Include="..\ApiKeys.Logic\ApiKeys.Logic.csproj" />
       <ProjectReference Include="..\ApiKeys.Client\ApiKeys.Client.csproj" />
       <ProjectReference Include="..\ApiKeys.Dal\ApiKeys.Dal.csproj" />
-      <ProjectReference Include="..\..\Core\Core\Core.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -41,4 +40,3 @@
     </ItemGroup>
 
 </Project>
-
