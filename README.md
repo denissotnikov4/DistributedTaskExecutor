@@ -7,10 +7,9 @@
 Проект построен на основе **Clean Architecture** и состоит из следующих компонентов:
 
 ### TaskService (API сервис)
-- **TaskManagement.Domain** - доменные модели и интерфейсы
-- **TaskManagement.Application** - бизнес-логика и сервисы
-- **TaskManagement.Infrastructure** - инфраструктура (EF Core, FluentMigrator, RabbitMQ, репозитории)
-- **TaskManagement.API** - REST API для управления задачами
+- **TaskService.Api** - REST API для управления задачами
+- **TaskService.Logic** - бизнес-логика и сервисы
+- **TaskManagement.Dal** - доменные модели и интерфейсы
 
 ### WorkerService (Сервис выполнения задач)
 - **TaskExecutor.Domain** - доменные интерфейсы (ICodeExecutor)
@@ -28,8 +27,7 @@
 - **Roslyn** - выполнение C# кода
 - **AutoMapper** - маппинг объектов
 - **FluentValidation** - валидация
-- **JWT Bearer** - аутентификация
-- **Serilog** - логирование
+- **Microsoft.Extensions.Logging** - логирование
 - **Docker** - контейнеризация
 
 ## Функциональность
@@ -38,8 +36,8 @@
 
 1. **Постановка задач**
    - Создание задачи с описанием, данными и TTL
-   - Поддержка выполнения реального C# кода
-   - Автоматическое добавление в очередь RabbitMQ
+   - Поддержка выполнения реального C#, Python кода
+   - Добавление в очередь RabbitMQ
 
 2. **Выполнение задач**
    - Распределенное выполнение между несколькими воркерами
@@ -80,7 +78,7 @@ docker-compose up -d
 ### Запуск API сервиса
 
 ```bash
-cd TaskService/TaskManagement.API
+cd TaskService/TaskService.Api
 dotnet run
 ```
 
@@ -103,61 +101,45 @@ dotnet run
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Host=localhost;Port=5432;Database=TaskManagementDb;Username=postgres;Password=postgres"
+    "DefaultConnection": "Host=localhost;Port=5432;Database=TaskServiceDb;Username=postgres;Password=postgres"
   },
   "RabbitMQ": {
     "HostName": "localhost",
     "UserName": "guest",
     "Password": "guest"
-  },
-  "Jwt": {
-    "Key": "YourSuperSecretKeyThatShouldBeAtLeast32CharactersLong!",
-    "Issuer": "TaskManagement",
-    "Audience": "TaskManagement"
   }
 }
 ```
 
 ## API Endpoints
 
-### Создание задачи
-```
-POST /api/tasks
-Content-Type: application/json
-Authorization: Bearer {token}
-
-{
-  "description": "Обработать данные",
-  "payload": "{\"data\": \"example\"}",
-  "code": "var data = JsonSerializer.Deserialize<Dictionary<string, string>>(Payload); return data[\"data\"].ToUpper();",
-  "ttl": "00:05:00",
-  "maxRetries": 3
-}
-```
-
-**Примечание:** Поле `code` опционально. Если указано, WorkerService выполнит этот C# код вместо стандартной обработки payload.
-
 ### Получение задачи по ID
 ```
 GET /api/tasks/{id}
-Authorization: Bearer {token}
+Authorization: ApiKey
 ```
 
 ### Получение всех задач
 ```
 GET /api/tasks
-Authorization: Bearer {token}
+Authorization: ApiKey
 ```
 
 ### Повторное выполнение задачи
 ```
 POST /api/tasks/{id}/retry
-Authorization: Bearer {token}
+Authorization: ApiKey
+```
+
+### Обновление задачи
+```
+PATCH /api/tasks/{id}
+Authorization: ApiKey
 ```
 
 ## Аутентификация
 
-API защищен JWT Bearer токенами. Для тестирования можно временно отключить авторизацию в `Program.cs`:
+API защищен ApiKey. Для тестирования можно временно отключить авторизацию в `Program.cs`:
 
 ```csharp
 // Закомментируйте эти строки для тестирования
@@ -165,8 +147,6 @@ API защищен JWT Bearer токенами. Для тестирования 
 // app.UseAuthentication();
 // app.UseAuthorization();
 ```
-
-И удалите атрибут `[Authorize]` из контроллера.
 
 ## Docker
 
@@ -206,7 +186,6 @@ docker run -d --name worker2 taskexecutor-worker
 - **Completed** - задача успешно завершена
 - **Expired** - время жизни задачи истекло
 - **Failed** - задача завершилась с ошибкой
-- **Cancelled** - задача отменена
 
 ## TTL (Time-to-Live)
 
@@ -221,7 +200,7 @@ TTL задается при создании задачи и определяе�
 
 ## Безопасность
 
-- JWT Bearer аутентификация
+- ApiKey аутентификация
 - HTTPS поддержка
 - Валидация входных данных
 - Защита от SQL инъекций (EF Core)
@@ -234,22 +213,9 @@ TTL задается при создании задачи и определяе�
 ```
 src/
 ├── TaskService/
-│   ├── TaskManagement.Domain/          # Доменный слой
-│   ├── TaskManagement.Application/      # Слой приложения
-│   ├── TaskManagement.Infrastructure/   # Инфраструктурный слой
-│   └── TaskManagement.API/              # API слой
+│   ├── TaskService.Api/         # API слой
+│   ├── TaskManagement.Logic/    # Слой приложения
+│   ├── TaskManagement.Dal/      # Слой работы с базой данных
 └── WorkerService/
     └── TaskExecutor.Worker/             # Worker сервис
 ```
-
-### Добавление новой функциональности
-
-1. Добавьте доменную модель в `TaskManagement.Domain`
-2. Создайте use case в `TaskManagement.Application`
-3. Реализуйте репозиторий в `TaskManagement.Infrastructure`
-4. Добавьте endpoint в `TaskManagement.API`
-
-## Лицензия
-
-MIT
-
