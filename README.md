@@ -4,7 +4,7 @@
 
 ## Архитектура
 
-Проект построен на основе **Clean Architecture** и состоит из следующих компонентов:
+Проект построен на основе **Three-tier Architecture** и состоит из следующих компонентов:
 
 ### TaskService (API сервис)
 - **TaskService.Api** - REST API для управления задачами
@@ -139,13 +139,11 @@ Authorization: ApiKey
 
 ## Аутентификация
 
-API защищен ApiKey. Для тестирования можно временно отключить авторизацию в `Program.cs`:
+API защищен ApiKey
 
 ```csharp
-// Закомментируйте эти строки для тестирования
-// builder.Services.AddAuthentication(...)
-// app.UseAuthentication();
-// app.UseAuthorization();
+app.UseAuthentication();
+app.UseAuthorization();
 ```
 
 ## Docker
