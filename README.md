@@ -349,6 +349,42 @@ GET /api/endpoint?apiKey=your-api-key-here
 - Сервис запускает код каждой задачи в отдельном docker-контейнере с минимальными правами для обеспечения безопасности хоста
 - Сервис позволяет конфигурировать версии dotnet / python, а также различные параметры выполнения кода через файл `settings.json` и переменные окружения
 
+#### Настройки (settings.json)
+
+```json
+{
+  "CodeExecution": {
+    "Timeout": "00:05:00",
+    "Docker": {
+      "CpuLimit": 0.25,
+      "MemoryMbLimit": 256,
+      "PidLimit": 10
+    },
+    "CSharp": {
+      "DotnetSdkImageName": "mcr.microsoft.com/dotnet/sdk:8.0",
+      "DotnetRuntimeImageName": "mcr.microsoft.com/dotnet/runtime:8.0",
+      "FrameworkVersion": "net8.0",
+      "LanguageVersion": "12.0"
+    },
+    "Python": {
+      "ImageName": "python:3.11-slim"
+    },
+    "Rabbit": {
+      "AppName": "WorkerService",
+      "HostName": "localhost",
+      "UserName": "guest",
+      "Password": "guest",
+      "Port": 5672,
+      "QueueName": "task_queue",
+      "ExchangeName": "task_exchange",
+      "ExchangeType": "direct",
+      "RoutingKey": "task_key"
+    },
+    "TaskServiceApiUrl": "http://task-service"
+  }
+}
+```
+
 #### Алгоритм работы
 При получении сообщения (ид задачи) из очереди сервис:
 1. Получает из основного АПИ полное представление задачи через библиотеку клиента
@@ -357,6 +393,20 @@ GET /api/endpoint?apiKey=your-api-key-here
 4. С помощью `Docker CLI` и класса `Process` идет запуск заранее написанного шаблона `Dockerfile`, выполняющего предварительную сборку (если необходимо) и запуск кода
 5. Результат выполнения получается через `stdout` / `stderr` и записывается в модель `Task`
 6. Текущее сообщение из `RabbitMQ` отмечается как `acked`
+
+#### Запуск в Docker
+
+```
+docker run -it \
+    -v /var/run/docker.sock:/var/run/docker.sock \
+    -v <path-to-local-settings.json>:/app/settings.json \
+    -e "ApiKey=my-api-key" \
+    -e "Rabbit__UserName=my-user-name" \
+    -e "Rabbit__Password=my-password" \
+    worker-service:latest
+```
+
+* Все обязательные настройки кроме секретов указаны в `settings.json`
 
 </details>
 
