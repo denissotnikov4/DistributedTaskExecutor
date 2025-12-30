@@ -15,6 +15,7 @@ using WorkerService.Cli.Services.CodeExecution;
 using WorkerService.Cli.Services.CodeExecution.Executors.Docker;
 using WorkerService.Cli.Services.ProjectCreation;
 using WorkerService.Cli.Settings;
+using WorkerService.Cli.Settings.CodeExecution;
 
 namespace WorkerService.Cli;
 
@@ -27,21 +28,32 @@ public static class Program
 
     private static IWorkerService GetWorkerService()
     {
-        const string logFileName = "log.txt";
-
-        var loggerFactory = new SerilogLoggerFactory(
-            new LoggerConfiguration().WriteTo.Console().WriteTo.File(logFileName).CreateLogger());
-
+        var loggerFactory = GetLoggerFactory();
         var workerServiceSettings = GetServiceSettings();
 
-        var codeExecutionService = new CodeExecutionService(
-            new ProjectCreationService(),
+        return new Services.WorkerService(
+            GetCodeExecutionService(workerServiceSettings.CodeExecution, loggerFactory),
+            GetRabbitMessageQueue(workerServiceSettings.RabbitSettings.ToCoreSettings(), loggerFactory),
+            GetTaskServiceClient(workerServiceSettings.TaskServiceApiUrl, workerServiceSettings.ApiKey, loggerFactory),
+            loggerFactory.CreateLogger<Services.WorkerService>());
+    }
+
+    private static ICodeExecutionService GetCodeExecutionService(CodeExecutionSettings settings, ILoggerFactory loggerFactory)
+    {
+        return new CodeExecutionService(
+            new ProjectCreationService(loggerFactory.CreateLogger<ProjectCreationService>()),
             new DockerExecutor(
                 new DefaultDockerBuildArgsFactory(),
-                workerServiceSettings.CodeExecution));
+                settings,
+                loggerFactory.CreateLogger<DockerExecutor>()));
+    }
 
-        var rabbitMessageQueue = new RabbitMessageQueue<Guid>(
-            workerServiceSettings.RabbitSettings.ToCoreSettings(),
+    private static IRabbitMessageQueue<Guid> GetRabbitMessageQueue(
+        RabbitMqSettings rabbitSettings,
+        ILoggerFactory loggerFactory)
+    {
+        return new RabbitMessageQueue<Guid>(
+            rabbitSettings,
             new JsonSerializerOptions
             {
                 WriteIndented = false,
@@ -49,17 +61,22 @@ public static class Program
                 DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
             },
             loggerFactory.CreateLogger<RabbitMessageQueue<Guid>>());
+    }
 
-        var taskServiceClient = new TaskServiceClient(
-            workerServiceSettings.TaskServiceApiUrl,
-            workerServiceSettings.ApiKey,
-            loggerFactory.CreateLogger<TaskServiceClient>());
+    private static ITaskServiceClient GetTaskServiceClient(string url, string apiKey, ILoggerFactory loggerFactory)
+    {
+        return new TaskServiceClient(url, apiKey, loggerFactory.CreateLogger<TaskServiceClient>());
+    }
 
-        return new Services.WorkerService(
-            codeExecutionService,
-            rabbitMessageQueue,
-            taskServiceClient,
-            loggerFactory.CreateLogger<Services.WorkerService>());
+    private static ILoggerFactory GetLoggerFactory()
+    {
+        const string logFileName = "log.txt";
+
+        var loggerConfiguration = new LoggerConfiguration()
+            .WriteTo.Console()
+            .WriteTo.File(logFileName);
+
+        return new SerilogLoggerFactory(loggerConfiguration.CreateLogger());
     }
 
     private static WorkerServiceSettings GetServiceSettings()

@@ -1,4 +1,5 @@
 ﻿using FluentAssertions;
+using Microsoft.Extensions.Logging.Abstractions;
 using WorkerService.Cli.Services.CodeExecution;
 using WorkerService.Cli.Services.CodeExecution.Executors.Docker;
 using WorkerService.Cli.Services.ProjectCreation;
@@ -57,7 +58,7 @@ public abstract class CodeExecutionTestsBase
     private static ICodeExecutionService GetCodeExecutionService()
     {
         return new CodeExecutionService(
-            new ProjectCreationService(),
+            new ProjectCreationService(new NullLogger<ProjectCreationService>()),
             new DockerExecutor(
                 new DefaultDockerBuildArgsFactory(),
                 new CodeExecutionSettings
@@ -80,6 +81,7 @@ public abstract class CodeExecutionTestsBase
                     {
                         ImageName = "python:3.11-slim"
                     }
-                }));
+                },
+                new NullLogger<DockerExecutor>()));
     }
 }
