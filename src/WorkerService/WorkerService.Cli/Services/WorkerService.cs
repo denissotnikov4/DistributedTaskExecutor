@@ -1,4 +1,6 @@
-﻿using DistributedTaskExecutor.Core.RabbitMQ;
+﻿using System.Net;
+using DistributedTaskExecutor.Core.RabbitMQ;
+using DistributedTaskExecutor.Core.Results;
 using Microsoft.Extensions.Logging;
 using TaskService.Client;
 using TaskService.Client.Models.Tasks;
@@ -44,22 +46,17 @@ public class WorkerService : IWorkerService
 
         if (!getTaskResult.IsSuccess)
         {
-            // TODO: Добавить отдельное поле для вида ошибки в Result.
-            return getTaskResult.Error.Message == "Resource not found";
+            return ((ClientError)getTaskResult.Error).StatusCode == HttpStatusCode.NotFound;
+        }
+
+        if (!await this.UpdateTask(taskId, TaskStatus.InProgress))
+        {
+            return false;
         }
 
         var (isInternalError, result) = await this.GetExecutionResult(GetExecutionContext(getTaskResult.Value));
 
-        var updateResult = await this.taskServiceClient.UpdateTaskAsync(
-            taskId,
-            new TaskUpdateRequest
-            {
-                Status = isInternalError ? TaskStatus.Failed : TaskStatus.Completed,
-                Result = result.Output,
-                ErrorMessage = result.ErrorMessage
-            });
-
-        if (!updateResult.IsSuccess)
+        if (!await this.UpdateTask(taskId, isInternalError ? TaskStatus.Failed : TaskStatus.Completed, result.Output, result.ErrorMessage))
         {
             return false;
         }
@@ -73,9 +70,7 @@ public class WorkerService : IWorkerService
     {
         try
         {
-            var result = await this.codeExecutionService.ExecuteAsync(context);
-
-            return (false, new ExecutionResult { Output = result.Output + result.ErrorMessage });
+            return (false, await this.codeExecutionService.ExecuteAsync(context));
         }
         catch (Exception exception)
         {
@@ -83,6 +78,26 @@ public class WorkerService : IWorkerService
 
             return (true, new ExecutionResult { ErrorMessage = exception.Message });
         }
+    }
+
+    private async Task<bool> UpdateTask(
+        Guid taskId,
+        TaskStatus status,
+        string? result = null,
+        string? errorMessage = null)
+    {
+        var request = new TaskUpdateRequest
+        {
+            Status = status,
+            StartedAt = status == TaskStatus.InProgress ? DateTime.UtcNow : null,
+            CompletedAt = status is TaskStatus.Completed or TaskStatus.Failed ? DateTime.UtcNow : null,
+            Result = result,
+            ErrorMessage = errorMessage
+        };
+
+        var updateResult = await this.taskServiceClient.UpdateTaskAsync(taskId, request);
+
+        return updateResult.IsSuccess;
     }
 
     private static ExecutionContext GetExecutionContext(ClientTask task)

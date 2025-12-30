@@ -1,4 +1,5 @@
-﻿using TaskService.Client.Models.Tasks;
+﻿using Microsoft.Extensions.Logging;
+using TaskService.Client.Models.Tasks;
 using WorkerService.Cli.Exceptions;
 using WorkerService.Cli.Helpers;
 using WorkerService.Cli.Models;
@@ -11,13 +12,16 @@ public class DockerExecutor : ICodeExecutor
 {
     private readonly IDockerBuildArgsFactory dockerBuildArgsFactory;
     private readonly CodeExecutionSettings executionSettings;
+    private readonly ILogger<DockerExecutor> logger;
 
     public DockerExecutor(
         IDockerBuildArgsFactory dockerBuildArgsFactory,
-        CodeExecutionSettings executionSettings)
+        CodeExecutionSettings executionSettings,
+        ILogger<DockerExecutor> logger)
     {
         this.dockerBuildArgsFactory = dockerBuildArgsFactory ?? throw new ArgumentNullException(nameof(dockerBuildArgsFactory));
         this.executionSettings = executionSettings ?? throw new ArgumentNullException(nameof(executionSettings));
+        this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
 
     public async Task<ExecutionResult> ExecuteAsync(
@@ -30,6 +34,11 @@ public class DockerExecutor : ICodeExecutor
         {
             await AddDockerfileToProject(projectPath, language);
 
+            this.logger.LogInformation(
+                "\"{language}\" dockerfile successfully added to project \"{projectPath}\".",
+                language,
+                projectPath);
+
             var buildResult = await CommandsHelper.DockerBuild(
                 contextName,
                 projectPath,
@@ -37,6 +46,8 @@ public class DockerExecutor : ICodeExecutor
                 this.GetLanguageBuildArgs(language));
 
             buildResult.ThrowIfFailed(() => new DockerBuildException(contextName, buildResult.Stderr!));
+
+            this.logger.LogInformation("Docker image build succeeded for project \"{projectPath}\".", projectPath);
 
             var runResult = await CommandsHelper.DockerRun(
                 contextName,
