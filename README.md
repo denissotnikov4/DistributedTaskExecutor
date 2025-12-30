@@ -57,6 +57,12 @@
 
 #### API Endpoints
 
+##### Создание задачи
+```
+POST /api/tasks
+Authorization: ApiKey
+```
+
 ##### Получение задачи по ID
 ```
 GET /api/tasks/{id}
@@ -369,11 +375,18 @@ GET /api/endpoint?apiKey=your-api-key-here
 </details>
 
 ## Взаимодействие между компонентами
-<img width="800" height="591" alt="изображение" src="https://github.com/user-attachments/assets/e20870e0-8286-4677-b2b9-18e01ff98703" />
 
-* Оба АПИ-сервиса (TaskService, ApiKeysService) имеют клиентов для предоставления удобного доступа к своему функционалу. Клиенты публикуются в виде nuget-пакетов через github-action и используются в других компонентах системы
+#### Успешное создание задачи
+<img width="1099" height="668" alt="изображение" src="https://github.com/user-attachments/assets/09e446d0-bb8b-4638-8188-c5dc5e4a34d1" />
 
-* Библиотека `Core` также публикуется nuget-пакетом
+#### Успешная обработка задачи WorkerService
+<img width="885" height="755" alt="изображение" src="https://github.com/user-attachments/assets/14fc0cf6-0091-4f5a-a6b3-6611ebd5f467" />
+
+* TaskService.Api и ApiKeysService.Api имеют клиентов для предоставления удобного доступа к своему функционалу
+
+* Клиенты публикуются в виде nuget-пакетов через настроенный github-action и используются в других компонентах системы (клиент TaskService.Api - в WorkerService, клиент ApiKeysService.Api в TaskService.Api)
+
+* Библиотека `Core` также публикуется nuget-пакетом и используется во всех компонентах системы
 
 ## Масштабирование
 
