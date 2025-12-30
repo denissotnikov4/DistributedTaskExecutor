@@ -1,4 +1,3 @@
-using ApiKeys.Client;
 using DistributedTaskExecutor.Core.Results;
 using Microsoft.Extensions.Logging;
 using TaskService.Client.Models.Tasks;
@@ -31,7 +30,7 @@ public class TaskServiceClient : ITaskServiceClient
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
 
         this.httpClient = new HttpClient { BaseAddress = new Uri(baseUrl) };
-        this.httpClient.AddApiKey(apiKey);
+        this.httpClient.DefaultRequestHeaders.Add("X-ApiKey", apiKey);
     }
 
     public async Task<ClientResult<ClientTask>> GetTaskByIdAsync(Guid id, CancellationToken cancelToken = default)
