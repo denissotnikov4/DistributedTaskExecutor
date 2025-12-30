@@ -33,7 +33,7 @@ public static class Program
 
         return new Services.WorkerService(
             GetCodeExecutionService(workerServiceSettings.CodeExecution, loggerFactory),
-            GetRabbitMessageQueue(workerServiceSettings.RabbitSettings.ToCoreSettings(), loggerFactory),
+            GetRabbitMessageQueue(workerServiceSettings.Rabbit.ToCoreSettings(), loggerFactory),
             GetTaskServiceClient(workerServiceSettings.TaskServiceApiUrl, workerServiceSettings.ApiKey, loggerFactory),
             loggerFactory.CreateLogger<Services.WorkerService>());
     }

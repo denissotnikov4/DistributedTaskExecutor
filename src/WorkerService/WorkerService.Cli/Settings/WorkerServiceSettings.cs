@@ -9,7 +9,7 @@ public class WorkerServiceSettings
     public CodeExecutionSettings CodeExecution { get; init; }
 
     [Required]
-    public RabbitSettings RabbitSettings { get; init; }
+    public RabbitSettings Rabbit { get; init; }
 
     [Required]
     public string ApiKey { get; init; }
